@@ -3,3 +3,5 @@ __pycache__
 sandbox.py
 apicache-py3
 *.egg-info
+*.lwp
+user-config.py
