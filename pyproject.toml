@@ -3,6 +3,7 @@ name = "civwiki_tools"
 version = "0.0.1"
 dependencies = [
     "pywikibot",
+    "pyyaml"
 ]
 
 # see "tip" in https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#setuptools-specific-configuration
