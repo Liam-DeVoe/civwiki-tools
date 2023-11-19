@@ -4,8 +4,9 @@ from dataclasses import dataclass
 
 def parse_list(ModelClass, data):
     models = []
-    for value in data.values():
+    for key, value in data.items():
         v = ModelClass.parse(value)
+        v.key = key
         models.append(v)
     return models
 
@@ -24,8 +25,13 @@ class Model:
                 continue
 
             val = data[attr]
-            print(f"processing {attr}: {type_}, value {val}")
-            if get_origin(type_) is list:
+
+            # uncomment for debugging
+            # print(f"processing {attr}: {type_}, value {val}")
+
+            if val is None:
+                v = None
+            elif get_origin(type_) is list:
                 v = val if type(val) is list else parse_list(get_args(type_)[0], val)
             else:
                 v = type_(val)
@@ -60,9 +66,22 @@ class FactoryType(Enum):
     PIPE = "PIPE"
     SORTER = "SORTER"
 
+class RecipeInputOutput(Model):
+    material: str
+    amount: int
+    lore: list[str]
+
 class Recipe(Model):
-    type: RecipeType
+    production_time: str
+    fuel_consumption_intervall: str
     name: str
+    type: RecipeType
+    input: list[RecipeInputOutput]
+    output: list[RecipeInputOutput]
+    health_gained: int
+    compact_lore: str
+    excluded_materials: list[str]
+
 
 class SetupCost(Model):
     material: str
@@ -100,4 +119,11 @@ def parse_factorymod(data):
     """
     Parse a .yaml factorymod config.
     """
-    return Config.parse(data)
+    config = Config.parse(data)
+
+    # process factory recipe names to actually be the full recipe
+    recipes = {r.key: r for r in config.recipes}
+    for factory in config.factories:
+        factory.recipes = [recipes[name] for name in factory.recipes]
+
+    return config
