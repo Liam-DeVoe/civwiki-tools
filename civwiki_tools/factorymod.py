@@ -148,6 +148,10 @@ class Config(Model):
     factories: list[Factory]
     recipes: list[Recipe]
 
+    # set by parse_factorymod.
+    # both are a mapping of factory_name to (upgrade_recipe, list[Factory])
+    # upgrades_to: dict[str, (recipe, list[Factory])]
+    # upgrades_from: dict[str, (recipe, list[Factory])]
 
 def parse_factorymod(data):
     """
@@ -160,4 +164,16 @@ def parse_factorymod(data):
     for factory in config.factories:
         factory.recipes = [recipes[name] for name in factory.recipes]
 
+    upgrades_to = defaultdict(list)
+    upgrades_from = defaultdict(list)
+    for factory in config.factories:
+        for recipe in factory.recipes:
+            if recipe.type is not RecipeType.UPGRADE:
+                continue
+            next_factory = [f for f in config.factories if f.name == recipe.factory][0]
+            upgrades_to[factory.name].append([recipe, next_factory])
+            upgrades_from[next_factory.name].append([recipe, factory])
+
+    config.upgrades_to = upgrades_to
+    config.upgrades_from = upgrades_from
     return config
