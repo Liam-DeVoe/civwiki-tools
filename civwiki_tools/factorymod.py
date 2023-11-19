@@ -39,6 +39,40 @@ class Model:
             kwargs[attr] = v
         return cls(**kwargs)
 
+# https://github.com/DevotedMC/CivModCore/blob/ad94009362cfc28d9de4a093d6c966cd0
+# 6d09c46/src/main/java/vg/civcraft/mc/civmodcore/util/ConfigParsing.java#L227
+class Duration:
+    def __init__(self, val):
+        # duration in seconds
+        seconds = 0
+        buffer = ""
+        for c in val:
+            if c.isdigit():
+                buffer += c
+                continue
+            if c == "s":
+                seconds += int(buffer)
+            elif c == "h":
+                seconds += 60 * int(buffer)
+            elif c == "d":
+                seconds += 24 * 60 * int(buffer)
+            else:
+                raise ValueError(f"unimplemented duration identifier {c} "
+                    f"(from {val})")
+        self.seconds = seconds
+
+    def __int__(self):
+        return self.seconds
+
+    def __mul__(self, other):
+        if isinstance(other, Duration):
+            return self.seconds * other.seconds
+        return self.seconds * other
+
+    def __str__(self):
+        return str(self.seconds)
+    __repr__ = __str__
+
 class RecipeType(Enum):
     UPGRADE = "UPGRADE"
     PRODUCTION = "PRODUCTION"
@@ -72,8 +106,8 @@ class RecipeInputOutput(Model):
     lore: list[str]
 
 class Recipe(Model):
-    production_time: str
-    fuel_consumption_intervall: str
+    production_time: Duration
+    fuel_consumption_intervall: Duration
     name: str
     type: RecipeType
     input: list[RecipeInputOutput]
@@ -98,12 +132,12 @@ class Fuel(Model):
     material: str
 
 class Config(Model):
-    default_update_time: str
+    default_update_time: Duration
     default_fuel: list[Fuel]
-    default_fuel_consumption_intervall: str
+    default_fuel_consumption_intervall: Duration
     default_return_rate: float
-    default_break_grace_period: str
-    decay_intervall: str
+    default_break_grace_period: Duration
+    decay_intervall: Duration
     decay_amount: int
     default_health: int
     disable_nether: bool
