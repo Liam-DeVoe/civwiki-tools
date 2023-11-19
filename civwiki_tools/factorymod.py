@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import get_type_hints, get_origin, get_args
 from dataclasses import dataclass
+from collections import defaultdict
 
 def parse_list(ModelClass, data):
     models = []
@@ -100,21 +101,28 @@ class FactoryType(Enum):
     PIPE = "PIPE"
     SORTER = "SORTER"
 
-class RecipeInputOutput(Model):
+class Quantity(Model):
     material: str
     amount: int
     lore: list[str]
+
+class RecipeRandomOutput(Model):
+    chance: float
+    quantities: list[Quantity]
 
 class Recipe(Model):
     production_time: Duration
     fuel_consumption_intervall: Duration
     name: str
     type: RecipeType
-    input: list[RecipeInputOutput]
-    output: list[RecipeInputOutput]
+    input: list[Quantity]
+    output: list[Quantity]
+    outputs: list[RecipeRandomOutput]
     health_gained: int
     compact_lore: str
     excluded_materials: list[str]
+    # used for RecipeType.UPGRADE recipes
+    factory: str
 
 
 class SetupCost(Model):
