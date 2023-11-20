@@ -7,7 +7,8 @@ from civwiki_tools import family
 from civwiki_tools.site import Site
 
 # register our family
-family_files[family.CivwikiFamily.name] = family.__file__
-site: Site = _Site("en", "civwiki", interface=Site)
+family_name = family.CivwikiFamily.name
+family_files[family_name] = family.__file__
+site: Site = _Site("en", family_name, interface=Site)
 
 RESOURCES = Path(__file__).parent.parent / "resources"
