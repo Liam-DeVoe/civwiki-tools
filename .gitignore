@@ -5,3 +5,4 @@ apicache-py3
 *.egg-info
 *.lwp
 user-config.py
+config.py
