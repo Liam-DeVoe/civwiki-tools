@@ -1,3 +1,6 @@
+# example usage:
+# python3 scripts/update_factorymod.py --server "civclassic 2.0"
+
 import yaml
 from argparse import ArgumentParser
 from civwiki_tools.utils import RESOURCES
