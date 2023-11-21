@@ -13,7 +13,7 @@ config_files = {
 
 def image(item_name):
     item_name = item_name.replace("_", " ").title()
-    return f"[[File:{item_name}.png|30px]]"
+    return f"[[File:{item_name}.png|23px|middle]]"
 
 def quantity_cell(quantities):
     # can happen for random outputs, where output is None but outputs is set
