@@ -1,6 +1,6 @@
 # imports an image of a block or item from minecraft.wiki.
 # Usage:
-# python scripts/import_item_image.py --name "Block of Emerald" --url https://minecraft.wiki/images/Block_of_Emerald_JE4_BE3.png
+# python3 scripts/import_item_image.py --name "Block of Emerald" --url https://minecraft.wiki/images/Block_of_Emerald_JE4_BE3.png
 
 from argparse import ArgumentParser
 
