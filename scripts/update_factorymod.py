@@ -53,8 +53,7 @@ def repair_recipes(config, factory):
         |{quantity_cell(r.input)}
         |{r.health_gained}
         |{time_cell(r)}
-        |{fuel_cell(config, r)}
-    """.strip() for r in repair_recipes)
+        |{fuel_cell(config, r)}""" for r in repair_recipes)
 
 def recipes(config, factory):
     non_production_types = [RecipeType.UPGRADE, RecipeType.REPAIR]
