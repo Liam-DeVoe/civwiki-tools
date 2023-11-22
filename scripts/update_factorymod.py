@@ -1,8 +1,11 @@
 # example usage:
 # python3 scripts/update_factorymod.py --server "civclassic 2.0"
 
-import yaml
+import time
 from argparse import ArgumentParser
+
+import yaml
+
 from civwiki_tools.utils import RESOURCES
 from civwiki_tools.factorymod import parse_factorymod, RecipeType, Factory, Config
 from civwiki_tools import site
@@ -164,7 +167,13 @@ def update_factory(config, factory, *, confirm=False, dry=False):
         print(page.text)
         return
 
-    page.save()
+    while True:
+        try:
+            page.save()
+            return
+        except Exception as e:
+            print(f"ignoring exception {e}. Waiting 5 seconds")
+            time.sleep(5)
 
 if __name__ == "__main__":
     parser = ArgumentParser()
