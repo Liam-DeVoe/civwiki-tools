@@ -91,7 +91,18 @@ def upgrades_from_to(config, factory):
         """
 
         rows.append(row)
-    return "".join(rows)
+
+    table = ""
+    if rows:
+        table = """
+            |-
+            !Upgrades From
+            !Cost
+            !Upgrades To
+            !Cost
+        """
+    table += "".join(rows)
+    return table
 
 # creation cost and repair recipes
 def meta_table(config: Config, factory: Factory):
@@ -101,11 +112,6 @@ def meta_table(config: Config, factory: Factory):
         ! colspan="4" |Creation Cost
         |-
         | colspan="4" |{quantity_cell(factory.setupcost)}
-        |-
-        !Upgrades From
-        !Cost
-        !Upgrades To
-        !Cost
         {upgrades_from_to(config, factory)}
         |-
         ! colspan="4" |Repair Cost
