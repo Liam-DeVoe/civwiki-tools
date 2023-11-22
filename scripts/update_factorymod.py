@@ -12,13 +12,15 @@ from civwiki_tools import site
 
 config_files = {
     "civcraft 3.0": RESOURCES / "civcraft 3.0.yaml",
-    "civclassic 2.0": RESOURCES / "civclassic 2.0.yaml"
+    "civclassic 2.0": RESOURCES / "civclassic 2.0.yaml",
+    "civmc": RESOURCES / "civmc.yaml"
 }
 # --server may be passed as e.g. civclassic 2.0, but the template page
 # exists at CivClassic 2.0.
 wiki_server_names = {
     "civcraft": "Civcraft",
-    "civclassic": "CivClassic"
+    "civclassic": "CivClassic",
+    "civmc": "CivMC"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
