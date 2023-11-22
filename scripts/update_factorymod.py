@@ -92,14 +92,18 @@ def upgrades_from_to(config, factory):
 
         rows.append(row)
 
-    table = ""
-    if rows:
-        table = """
+    table = """
+        |-
+        !Upgrades From
+        !Cost
+        !Upgrades To
+        !Cost
+    """
+    if not rows:
+        table += """
             |-
-            !Upgrades From
-            !Cost
-            !Upgrades To
-            !Cost
+            | colspan=\"2\" {{n/a}}
+            | colspan=\"2\" {{n/a}}
         """
     table += "".join(rows)
     return table
