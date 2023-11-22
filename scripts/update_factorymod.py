@@ -130,7 +130,7 @@ def recipes_table(config: Config, factory: Factory):
         |}}
     """
 
-def update_factory(config, factory, *, confirm=False):
+def update_factory(config, factory, *, confirm=False, dry=False):
     meta_t = meta_table(config, factory)
     recipes_t = recipes_table(config, factory)
 
@@ -151,12 +151,17 @@ def update_factory(config, factory, *, confirm=False):
             print(f"skipped {title}")
             return
 
+    if dry:
+        print(page.text)
+        return
+
     page.save()
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--server", required=True)
     parser.add_argument("--factory", required=True)
+    parser.add_argument("--dry", action="store_true", default=False)
     args = parser.parse_args()
 
     if args.server not in config_files:
@@ -174,4 +179,4 @@ if __name__ == "__main__":
             f"{[f.name for f in config.factories]}")
 
     factory = factory[0]
-    update_factory(config, factory)
+    update_factory(config, factory, dry=args.dry)
