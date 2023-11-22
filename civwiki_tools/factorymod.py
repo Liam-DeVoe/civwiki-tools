@@ -157,9 +157,9 @@ class Config(Model):
     recipes: list[Recipe]
 
     # set by parse_factorymod.
-    # both are a mapping of factory_name to (upgrade_recipe, list[Factory])
-    # upgrades_to: dict[str, (recipe, list[Factory])]
-    # upgrades_from: dict[str, (recipe, list[Factory])]
+    # both are a mapping of factory_name to list[(upgrade_recipe, Factory)]
+    # upgrades_to: dict[str, list[(recipe, Factory)]]
+    # upgrades_from: dict[str, list[(recipe, Factory)]]
 
 def parse_factorymod(data):
     """
