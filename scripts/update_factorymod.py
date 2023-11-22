@@ -51,7 +51,7 @@ def repair_recipes(config, factory):
         |{r.health_gained}
         |{time_cell(r)}
         |{fuel_cell(config, r)}
-    """ for r in repair_recipes)
+    """.strip() for r in repair_recipes)
 
 def recipes(config, factory):
     non_production_types = [RecipeType.UPGRADE, RecipeType.REPAIR]
@@ -62,8 +62,7 @@ def recipes(config, factory):
         |{quantity_cell(r.input)}
         |{quantity_cell(r.output)}
         |{time_cell(r)}
-        |{fuel_cell(config, r)}
-    """ for r in recipes)
+        |{fuel_cell(config, r)}""" for r in recipes)
 
 def upgrades_from_to(config, factory):
     upgrades_from = config.upgrades_from[factory.name]
@@ -98,13 +97,13 @@ def upgrades_from_to(config, factory):
         !Cost
         !Upgrades To
         !Cost
-    """
+    """.strip()
     if not rows:
         table += """
             |-
             | colspan=\"2\" {{n/a}}
             | colspan=\"2\" {{n/a}}
-        """
+        """.strip()
     table += "".join(rows)
     return table
 
@@ -126,7 +125,7 @@ def meta_table(config: Config, factory: Factory):
         {repair_recipes(config, factory)}
         {upgrades_from_to(config, factory)}
         |}}
-    """
+    """.strip()
 
 def recipes_table(config: Config, factory: Factory):
     return f"""
@@ -138,7 +137,7 @@ def recipes_table(config: Config, factory: Factory):
         !Fuel
         {recipes(config, factory)}
         |}}
-    """
+    """.strip()
 
 def update_factory(config, factory, *, confirm=False, dry=False):
     meta_t = meta_table(config, factory)
@@ -152,7 +151,7 @@ def update_factory(config, factory, *, confirm=False, dry=False):
 
     title = page_title.format(factory=factory.name, server=wiki_server_name)
     page = site.page(title)
-    page.text = f"{meta_t}{recipes_t}"
+    page.text = f"{meta_t}\n\n{recipes_t}"
     title = page.title()
 
     if confirm:
