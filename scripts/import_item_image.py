@@ -4,33 +4,43 @@
 
 from argparse import ArgumentParser
 
-from civwiki_tools import site
-
+from bs4 import BeautifulSoup
+import requests
 from pywikibot.specialbots import UploadRobot
 
-MINECRAFT_BASE_URL = "https://minecraft.wiki/w/File:{item_name}.png"
+from civwiki_tools import site
 
-# def guess_url(args):
-#     if args.url is not None:
-#         return args.url
 
-#     # try and intelligently clean it up, but leave alone otherwise.
-#     item_name = args.item_name
-#     if "_" in item_name:
-#         item_name = item_name.replace("_", " ").title()
+MINECRAFT_BASE_URL = "https://minecraft.wiki"
+MINECRAFT_FILE_URL = f"{MINECRAFT_BASE_URL}/w/File:{{item_name}}.png"
 
-#     image_url = MINECRAFT_BASE_URL.format(item_name=item_name)
+def guess_url(args):
+    if args.url is not None:
+        return args.url
 
-#     # UploadRobot won't follow redirects for us, so we have to do it here.
-#     r = requests.get(image_url, allow_redirects=True)
-#     return r.url
+    # try and intelligently clean it up, but leave alone otherwise.
+    item_name = args.name
+    if "_" in item_name:
+        item_name = item_name.replace("_", " ").title()
+    if item_name.endswith(" Block"):
+        item_name = f"Block of {item_name.removesuffix(" Block")}"
+
+    image_url = MINECRAFT_FILE_URL.format(item_name=item_name)
+
+    r = requests.get(image_url, allow_redirects=True)
+    # we're now at https://minecraft.wiki/w/File:Nether_Wart_Age_3_JE8.png.
+    # we want to parse the direct file name of
+    # https://minecraft.wiki/images/Nether_Wart_Age_3_JE8.png?d9978.
+    soup = BeautifulSoup(r.text)
+    image_url = soup.select(".fullMedia a")[0].get("href")
+    return f"{MINECRAFT_BASE_URL}{image_url}"
 
 parser = ArgumentParser()
-parser.add_argument("--name")
-parser.add_argument("--url")
+parser.add_argument("name")
+parser.add_argument("url", nargs="?")
 args = parser.parse_args()
 
-image_url = args.url
+image_url = guess_url(args)
 item_name = args.name
 
 description = f"{item_name}. Imported from minecraft.wiki ({image_url})"
