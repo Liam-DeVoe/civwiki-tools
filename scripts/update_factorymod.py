@@ -130,7 +130,7 @@ def recipes_table(config: Config, factory: Factory):
         |}}
     """
 
-def update_factory(config, factory):
+def update_factory(config, factory, *, confirm=False):
     meta_t = meta_table(config, factory)
     recipes_t = recipes_table(config, factory)
 
@@ -145,10 +145,11 @@ def update_factory(config, factory):
     page.text = f"{meta_t}{recipes_t}"
     title = page.title()
 
-    y_n = input(f"update {title}? y/n ")
-    if y_n.lower() != "y":
-        print(f"skipped {title}")
-        return
+    if confirm:
+        y_n = input(f"update {title}? y/n ")
+        if y_n.lower() != "y":
+            print(f"skipped {title}")
+            return
 
     page.save()
 
