@@ -144,6 +144,7 @@ def recipes_table(config: Config, factory: Factory):
 def update_factory(config, factory, *, confirm=False, dry=False):
     meta_t = meta_table(config, factory)
     recipes_t = recipes_table(config, factory)
+    new_text = f"{meta_t}\n\n{recipes_t}"
 
     # --server may be passed as e.g. civclassic 2.0, but the template page
     # exists at CivClassic 2.0.
@@ -153,14 +154,19 @@ def update_factory(config, factory, *, confirm=False, dry=False):
 
     title = page_title.format(factory=factory.name, server=wiki_server_name)
     page = site.page(title)
-    page.text = f"{meta_t}\n\n{recipes_t}"
     title = page.title()
+
+    if page.text == new_text:
+        print(f"Nothing has changed for {title}. Skipping update")
+        return
 
     if confirm:
         y_n = input(f"update {title}? y/n ")
         if y_n.lower() != "y":
             print(f"skipped {title}")
             return
+
+    page.text = new_text
 
     if dry:
         print(page.text)
