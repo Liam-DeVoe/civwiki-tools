@@ -22,8 +22,6 @@ def guess_url(args):
     item_name = args.name
     if "_" in item_name:
         item_name = item_name.replace("_", " ").title()
-    if item_name.endswith(" Block"):
-        item_name = f"Block of {item_name.removesuffix(" Block")}"
 
     image_url = MINECRAFT_FILE_URL.format(item_name=item_name)
 
