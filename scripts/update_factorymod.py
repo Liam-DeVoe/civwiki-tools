@@ -116,7 +116,6 @@ def meta_table(config: Config, factory: Factory):
         ! colspan="4" |Creation Cost
         |-
         | colspan="4" |{quantity_cell(factory.setupcost)}
-        {upgrades_from_to(config, factory)}
         |-
         ! colspan="4" |Repair Cost
         |-
@@ -125,6 +124,7 @@ def meta_table(config: Config, factory: Factory):
         !Time
         !Fuel
         {repair_recipes(config, factory)}
+        {upgrades_from_to(config, factory)}
         |}}
     """
 
