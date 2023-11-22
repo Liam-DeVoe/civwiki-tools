@@ -183,10 +183,13 @@ if __name__ == "__main__":
         data = yaml.safe_load(f)
 
     config = parse_factorymod(data)
-    factory = [f for f in config.factories if f.name == args.factory]
-    if not factory:
-        raise ValueError(f"no factory named {args.factory}. Expected one of "
-            f"{[f.name for f in config.factories]}")
+    if args.factory == "all":
+        factories = config.factories
+    else:
+        factories = [f for f in config.factories if f.name == args.factory]
+        if not factories:
+            raise ValueError(f"no factory named {args.factory}. Expected one of "
+                f"{[f.name for f in config.factories]}")
 
-    factory = factory[0]
-    update_factory(config, factory, dry=args.dry)
+    for factory in factories:
+        update_factory(config, factory, dry=args.dry)
