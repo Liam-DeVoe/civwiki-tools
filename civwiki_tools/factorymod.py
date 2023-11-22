@@ -170,7 +170,14 @@ def parse_factorymod(data):
     # process factory recipe names to actually be the full recipe
     recipes = {r.key: r for r in config.recipes}
     for factory in config.factories:
-        factory.recipes = [recipes[name] for name in factory.recipes]
+        factory_recipes = factory.recipes
+        factory.recipes = []
+        for recipe_name in factory_recipes:
+            if recipe_name not in recipes:
+                print(f"Could not find recipe {recipe_name} (from factory "
+                    f"{factory.name}) in list of recipes. Skipping")
+                continue
+            factory.recipes.append(recipes[recipe_name])
 
     upgrades_to = defaultdict(list)
     upgrades_from = defaultdict(list)
