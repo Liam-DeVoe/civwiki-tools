@@ -6,4 +6,4 @@ apicache-py3
 *.lwp
 user-config.py
 config.py
-items.txt
+input.txt
