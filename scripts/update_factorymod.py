@@ -1,7 +1,6 @@
 # example usage:
 # python3 scripts/update_factorymod.py --server "civclassic 2.0"
 
-import time
 from argparse import ArgumentParser
 
 import yaml
@@ -174,7 +173,6 @@ def update_factory(config, factory, *, confirm=False, dry=False):
         except Exception as e:
             print(f"ignoring exception {e}. Relogging...")
             relog()
-            time.sleep(5)
 
 if __name__ == "__main__":
     parser = ArgumentParser()
