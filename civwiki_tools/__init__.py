@@ -27,3 +27,4 @@ manager = ClientLoginManager(user=user, password=password, site=site)
 manager.login()
 # force a re-fetch of site information
 del site.userinfo
+del site.tokens
