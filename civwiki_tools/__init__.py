@@ -25,6 +25,9 @@ password = mod["password"]
 
 manager = ClientLoginManager(user=user, password=password, site=site)
 manager.login()
-# force a re-fetch of site information
+
+# force a re-fetch of site information. Even though we just logged in, pywikibot
+# keeps information for an anonymous user here, and we need to tell it to update
+# for our freshly logged in user.
 del site.userinfo
 del site.tokens

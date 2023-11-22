@@ -12,3 +12,7 @@ family_files[family_name] = family.__file__
 site: Site = _Site("en", family_name, interface=Site)
 
 RESOURCES = Path(__file__).parent.parent / "resources"
+
+def relog():
+    del site.userinfo
+    del site.tokens
