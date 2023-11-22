@@ -105,8 +105,7 @@ def upgrades_from_to(config, factory):
         table += """
             |-
             | colspan=\"2\" {{n/a}}
-            | colspan=\"2\" {{n/a}}
-        """.strip()
+            | colspan=\"2\" {{n/a}}"""
     table += "".join(rows)
     return table
 
