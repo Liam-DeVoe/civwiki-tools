@@ -31,7 +31,7 @@ def guess_url(args):
     # we're now at https://minecraft.wiki/w/File:Nether_Wart_Age_3_JE8.png.
     # we want to parse the direct file name of
     # https://minecraft.wiki/images/Nether_Wart_Age_3_JE8.png?d9978.
-    soup = BeautifulSoup(r.text)
+    soup = BeautifulSoup(r.text, features="lxml")
     image_url = soup.select(".fullMedia a")[0].get("href")
     return f"{MINECRAFT_BASE_URL}{image_url}"
 
