@@ -5,11 +5,20 @@ import yaml
 from argparse import ArgumentParser
 from civwiki_tools.utils import RESOURCES
 from civwiki_tools.factorymod import parse_factorymod, RecipeType, Factory, Config
+from civwiki_tools import site
 
 config_files = {
     "civcraft 3.0": RESOURCES / "civcraft 3.0.yaml",
     "civclassic 2.0": RESOURCES / "civclassic 2.0.yaml"
 }
+# --server may be passed as e.g. civclassic 2.0, but the template page
+# exists at CivClassic 2.0.
+wiki_server_names = {
+    "civcraft": "Civcraft",
+    "civclassic": "CivClassic"
+}
+
+page_title = "Template:FactoryModConfig_{factory}_({server})"
 
 def image(item_name):
     item_name = item_name.replace("_", " ").title()
@@ -121,9 +130,32 @@ def recipes_table(config: Config, factory: Factory):
         |}}
     """
 
+def update_factory(config, factory):
+    meta_t = meta_table(config, factory)
+    recipes_t = recipes_table(config, factory)
+
+    # --server may be passed as e.g. civclassic 2.0, but the template page
+    # exists at CivClassic 2.0.
+    wiki_server_name = args.server
+    for k, v in wiki_server_names.items():
+        wiki_server_name = args.server.replace(k, v)
+
+    title = page_title.format(factory=factory.name, server=wiki_server_name)
+    page = site.page(title)
+    page.text = f"{meta_t}{recipes_t}"
+    title = page.title()
+
+    y_n = input(f"update {title}? y/n ")
+    if y_n.lower() != "y":
+        print(f"skipped {title}")
+        return
+
+    page.save
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--server", required=True)
+    parser.add_argument("--factory", required=True)
     args = parser.parse_args()
 
     if args.server not in config_files:
@@ -135,11 +167,10 @@ if __name__ == "__main__":
         data = yaml.safe_load(f)
 
     config = parse_factorymod(data)
-    factory = config.factories[8]
-    print(meta_table(config, factory))
-    print(recipes_table(config, factory))
+    factory = [f for f in config.factories if f.name == args.factory]
+    if not factory:
+        raise ValueError(f"no factory named {args.factory}. Expected one of "
+            f"{[f.name for f in config.factories]}")
 
-
-    # page = site.page("Factories (Civcraft 3.0)")
-    # page.text = page.text.replace("foo", "bar")
-    # print(page.text)
+    factory = factory[0]
+    update_factory(config, factory)
