@@ -150,7 +150,7 @@ def update_factory(config, factory):
         print(f"skipped {title}")
         return
 
-    page.save
+    page.save()
 
 if __name__ == "__main__":
     parser = ArgumentParser()
