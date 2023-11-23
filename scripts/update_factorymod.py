@@ -150,7 +150,7 @@ def update_factory(config, factory, *, confirm=False, dry=False):
     # exists at CivClassic 2.0.
     wiki_server_name = args.server
     for k, v in wiki_server_names.items():
-        wiki_server_name = args.server.replace(k, v)
+        wiki_server_name = wiki_server_name.replace(k, v)
 
     title = page_title.format(factory=factory.name, server=wiki_server_name)
     page = site.page(title)
