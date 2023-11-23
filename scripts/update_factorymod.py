@@ -116,7 +116,7 @@ def meta_table(config: Config, factory: Factory):
         |+
         ! colspan="4" |Creation Cost
         |-
-        | colspan="4" |{quantity_cell(factory.setupcost) if factory.setupcost else "{{n/a}}"}
+        | colspan="4" {f"|{quantity_cell(factory.setupcost)}" if factory.setupcost else "{{n/a}}"}
         |-
         ! colspan="4" |Repair Cost
         |-
