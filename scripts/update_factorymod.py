@@ -78,14 +78,6 @@ def upgrades_from_to(config, factory):
     for i in range(max(len(upgrades_from), len(upgrades_to))):
         (r_from, f_from) = upgrades_from[i] if i < len(upgrades_from) else (None, None)
         (r_to, f_to) = upgrades_to[i] if i < len(upgrades_to) else (None, None)
-        # row = f"""
-        #     |-
-        #     |{f_from.name if f_from else "{{n/a}}"}
-        #     |{quantity_cell(r_from.input) if r_from else "{{n/a}}"}
-        #     |{f_to.name if f_to else "{{n/a}}"}
-        #     |{quantity_cell(r_to.input) if r_to else "{{n/a}}"}
-        # """
-
         row = f"""
             |-
             |{f"{f_from.name}\n|{quantity_cell(r_from.input)}" if f_from else " colspan=\"2\" {{n/a}}"}
