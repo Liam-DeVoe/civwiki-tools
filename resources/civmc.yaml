@@ -951,7 +951,7 @@ factories:
         amount: 4
     recipes:
       - wordbank_item
-      - repair_station          
+      - repair_station
   concrete_mixer:
     type: FCC
     name: Concrete Mixer
@@ -1599,7 +1599,7 @@ recipes:
     output:
       glass:
         material: GLASS
-        amount: 128      
+        amount: 128
   smelt_netherrack:
     production_time: 4s
     name: Smelt Netherrack
@@ -1817,7 +1817,7 @@ recipes:
         amount: 64
       bucket:
         material: BUCKET
-        amount: 1    
+        amount: 1
   make_end_stone:
     production_time: 4s
     name: Make End stone
@@ -1828,7 +1828,7 @@ recipes:
         amount: 64
       yellow dye:
         material: YELLOW_DYE
-        amount: 8        
+        amount: 8
     output:
       end_stone:
         material: END_STONE
@@ -6557,7 +6557,7 @@ recipes:
     output:
       thing_banner_pattern:
         material: MOJANG_BANNER_PATTERN
-        amount: 1   
+        amount: 1
   repair_printer:
     forceInclude: true
     type: REPAIR
@@ -6571,7 +6571,7 @@ recipes:
         material: PAPER
         amount: 6
     health_gained: 10000
-  repair_station:     
+  repair_station:
     forceInclude: true
     type: REPAIR
     name: Repair Station
@@ -7121,7 +7121,7 @@ recipes:
           amount: 1
       record_otherside:
         chance: 0.00005042014
-        record_otherside: 
+        record_otherside:
           material: MUSIC_DISC_OTHERSIDE
           amount: 1
       minecart:
@@ -7789,7 +7789,7 @@ recipes:
           name: Sand!
       gravel:
         chance: 0.18044560740
-        gravel: 
+        gravel:
           material: GRAVEL
           amount: 1
           name: Gravel!
@@ -7811,7 +7811,7 @@ recipes:
       dirt:
         material: DIRT
         amount: 16
-    health_gained: 10000  
+    health_gained: 10000
   repair_gold_forge:
     production_time: 4s
     name: Repair Factory
@@ -7946,7 +7946,7 @@ recipes:
     output:
       mushroom_stem:
         material: MUSHROOM_STEM
-        amount: 16 
+        amount: 16
   kill_bush:
     production_time: 4s
     fuel_consumption_intervall: 1s
