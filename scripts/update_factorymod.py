@@ -32,7 +32,8 @@ item_mappings = {
     "Grilled Pork": "Cooked Porkchop",
     "Thin Glass": "Glass Pane",
     "Wool": "White Wool",
-    "Quartz Ore": "Nether Quartz Ore"
+    "Quartz Ore": "Nether Quartz Ore",
+    "Sapling": "Oak Sapling"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
