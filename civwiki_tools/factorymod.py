@@ -22,7 +22,8 @@ class Model:
         for attr, type_ in type_hints.items():
             # optional keys. e.g. setupcost is not required for factories
             if attr not in data:
-                kwargs[attr] = None
+                # default to [] for lists
+                kwargs[attr] = None if get_origin(type_) is not list else []
                 continue
 
             val = data[attr]
