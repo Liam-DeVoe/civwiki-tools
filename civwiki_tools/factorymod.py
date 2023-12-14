@@ -117,6 +117,10 @@ class FactoryType(Enum):
 
 class Quantity(Model):
     material: str
+    # amount defaults to 1. At least for civcraft; I haven't checked devoted.
+    # https://github.com/Civcraft/CivModCore/blob/70859b8485b39973abc4aed3a59025
+    # a4d1fb8541/src/main/java/vg/civcraft/mc/civmodcore/util/ConfigParsing.java
+    # #L194
     amount: int = 1
     lore: list[str]
 
