@@ -13,7 +13,7 @@ def parse_list(ModelClass, data):
 
 class Model:
     def __init_subclass__(cls):
-        return dataclass(cls)
+        return dataclass(cls, kw_only=True)
 
     @classmethod
     def parse(cls, data):
@@ -23,7 +23,10 @@ class Model:
             # optional keys. e.g. setupcost is not required for factories
             if attr not in data:
                 # default to [] for lists
-                kwargs[attr] = None if get_origin(type_) is not list else []
+                default = None if get_origin(type_) is not list else []
+                # individual attributes can specify defaults
+                default = getattr(cls, attr, default)
+                kwargs[attr] = default
                 continue
 
             val = data[attr]
@@ -114,7 +117,7 @@ class FactoryType(Enum):
 
 class Quantity(Model):
     material: str
-    amount: int
+    amount: int = 1
     lore: list[str]
 
 class RecipeRandomOutput(Model):
