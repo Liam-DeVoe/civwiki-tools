@@ -27,7 +27,7 @@ wiki_server_names = {
 item_mappings = {
     # for civcraft 3.0
     "Log": "Oak Log",
-    "Wood": "Oak Planks",
+    "Wood": "Oak Plank",
     "Ink Sack": "Ink Sac",
     "Grilled Pork": "Cooked Porkchop",
     "Thin Glass": "Glass Pane",
