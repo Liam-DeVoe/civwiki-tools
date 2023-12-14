@@ -54,10 +54,20 @@ class Duration:
                 continue
             if c == "s":
                 seconds += int(buffer)
-            elif c == "h":
+            elif c == "m":
                 seconds += 60 * int(buffer)
+            elif c == "h":
+                seconds += 60 * 60 * int(buffer)
             elif c == "d":
-                seconds += 24 * 60 * int(buffer)
+                seconds += 24 * 60 * 60 * int(buffer)
+            elif c == "t":
+                # ticks. used by civcraft, but removed in devoted.
+                # https://github.com/Civcraft/CivModCore/blob/70859b8485b39973a
+                # bc4aed3a59025a4d1fb8541/src/main/java/vg/civcraft/mc/civmod
+                # core/util/ConfigParsing.java#L231
+
+                # 20 ticks per second
+                seconds += 0.05 * int(buffer)
             else:
                 raise ValueError(f"unimplemented duration identifier {c} "
                     f"(from {val})")
