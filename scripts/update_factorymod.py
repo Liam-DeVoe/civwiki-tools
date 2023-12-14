@@ -37,7 +37,8 @@ item_mappings = {
     "Rails": "Rail",
     "Iron Fence": "Iron Bars",
     "Iron Spade": "Iron Shovel",
-    "Diamond Spade": "Diamond Shovel"
+    "Diamond Spade": "Diamond Shovel",
+    "Stone Spade": "Stone Shovel"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
