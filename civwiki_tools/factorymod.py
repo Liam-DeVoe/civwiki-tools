@@ -196,6 +196,11 @@ def parse_factorymod(data):
         for recipe in factory.recipes:
             if recipe.type is not RecipeType.UPGRADE:
                 continue
+            # Upgrade_to_Wood_Processor_2 in civcraft 3.0.yaml doesn't specify
+            # a factory: attribute. sigh. how did this get past civmodcore
+            # validation?
+            if recipe.factory is None:
+                continue
             next_factory = [f for f in config.factories if f.name == recipe.factory][0]
             upgrades_to[factory.name].append([recipe, next_factory])
             upgrades_from[next_factory.name].append([recipe, factory])
