@@ -35,7 +35,8 @@ item_mappings = {
     "Quartz Ore": "Nether Quartz Ore",
     "Sapling": "Oak Sapling",
     "Rails": "Rail",
-    "Iron Fence": "Iron Bars"
+    "Iron Fence": "Iron Bars",
+    "Iron Spade": "Iron Shovel"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
