@@ -201,7 +201,9 @@ def parse_factorymod(data):
             # validation?
             if recipe.factory is None:
                 continue
-            next_factory = [f for f in config.factories if f.name == recipe.factory][0]
+            next_factory = [f for f in config.factories if f.name == recipe.factory]
+            assert len(next_factory) == 1
+            next_factory = next_factory[0]
             upgrades_to[factory.name].append([recipe, next_factory])
             upgrades_from[next_factory.name].append([recipe, factory])
 
