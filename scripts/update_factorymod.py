@@ -31,6 +31,7 @@ item_mappings = {
     "Ink Sack": "Ink Sac",
     "Grilled Pork": "Cooked Porkchop",
     "Thin Glass": "Glass Pane",
+    "Wool": "White Wool"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
