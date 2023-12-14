@@ -22,10 +22,23 @@ wiki_server_names = {
     "civmc": "CivMC"
 }
 
+# not sure where some of these servers got some of these names. Did "Oak Log"
+# and "Oak Planks" really used to be called "Log" and "Wood"?
+item_mappings = {
+    # for civcraft 3.0
+    "Log": "Oak Log",
+    "Wood": "Oak Planks",
+    "Ink Sack": "Ink Sac",
+    "Grilled Pork": "Cooked Porkchop",
+    "Thin Glass": "Glass Pane",
+}
+
 page_title = "Template:FactoryModConfig_{factory}_({server})"
 
 def image(item_name):
     item_name = item_name.replace("_", " ").title()
+    if item_name in item_mappings:
+        item_name = item_mappings[item_name]
     return f"[[File:{item_name}.png|23px|middle]]"
 
 def quantity_cell(quantities):
