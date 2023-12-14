@@ -33,7 +33,9 @@ item_mappings = {
     "Thin Glass": "Glass Pane",
     "Wool": "White Wool",
     "Quartz Ore": "Nether Quartz Ore",
-    "Sapling": "Oak Sapling"
+    "Sapling": "Oak Sapling",
+    "Rails": "Rail",
+    "Iron Fence": "Iron Bars"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
