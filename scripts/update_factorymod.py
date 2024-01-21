@@ -222,18 +222,18 @@ class FactoryModPrinter:
         )
 
     def random_recipes_tables(self):
-        out = ""
+        tables = []
         for random_recipe in self.random_recipes:
-            out += f"""
+            tables.append(f"""
             {{| class="wikitable"
             |+{{{{anchor|{random_recipe.name}}}}} {random_recipe.name}
             !Probability
             !Drops
             {self.random_recipe_cells(random_recipe)}
             |}}
-        """.strip()
+        """.strip())
 
-        return out
+        return "\n\n".join(tables)
 
 def update_factory(config, factory, *, confirm=False, dry=False):
     printer = FactoryModPrinter(config, factory)
