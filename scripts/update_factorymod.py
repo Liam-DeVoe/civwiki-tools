@@ -27,19 +27,12 @@ wiki_server_names = {
 # and "Oak Planks" really used to be called "Log" and "Wood"?
 item_mappings = {
     # for civcraft 3.0
+    # TODO should we move these to redirects wiki-side instead?
     "Log": "Oak Log",
     "Wood": "Oak Planks",
-    "Ink Sack": "Ink Sac",
-    "Grilled Pork": "Cooked Porkchop",
-    "Thin Glass": "Glass Pane",
     "Wool": "White Wool",
     "Quartz Ore": "Nether Quartz Ore",
     "Sapling": "Oak Sapling",
-    "Rails": "Rail",
-    "Iron Fence": "Iron Bars",
-    "Iron Spade": "Iron Shovel",
-    "Diamond Spade": "Diamond Shovel",
-    "Stone Spade": "Stone Shovel"
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
