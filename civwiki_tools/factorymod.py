@@ -11,6 +11,11 @@ def parse_list(ModelClass, data):
         models.append(v)
     return models
 
+# fields with a value of SPECIAL_PARSING will be parsed in a particular
+# hardcoded way that is not worth generalizing or making abstract.
+# yes, this is a hack. no, I'm not sorry.
+SPECIAL_PARSING_1 = object()
+
 class Model:
     def __init_subclass__(cls):
         return dataclass(cls, kw_only=True)
@@ -20,6 +25,12 @@ class Model:
         type_hints = get_type_hints(cls)
         kwargs = {}
         for attr, type_ in type_hints.items():
+            if getattr(cls, attr, None) is SPECIAL_PARSING_1:
+                val = data.copy()
+                del val["chance"]
+                kwargs[attr] = parse_list(get_args(type_)[0], val)
+                continue
+
             # optional keys. e.g. setupcost is not required for factories
             if attr not in data:
                 # default to [] for lists
@@ -126,7 +137,11 @@ class Quantity(Model):
 
 class RecipeRandomOutput(Model):
     chance: float
-    quantities: list[Quantity]
+    # this isn't actually represented as a list in the yaml, and we don't
+    # know ahead of time what the key will be (because it's the same as the
+    # recipe name, which could be anything like dragon_egg). use a custom parser
+    # for it.
+    quantities: list[Quantity] = SPECIAL_PARSING_1
 
 class Recipe(Model):
     production_time: Duration
