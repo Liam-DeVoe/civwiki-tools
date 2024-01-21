@@ -1,5 +1,6 @@
 # example usage:
 # python3 scripts/update_factorymod.py --server "civclassic 2.0"
+# python3 scripts/update_factorymod.py --server "civclassic 2.0" --factory "Ore Smelter"
 
 from argparse import ArgumentParser
 
@@ -43,121 +44,200 @@ item_mappings = {
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
 
-def image(item_name):
-    item_name = item_name.replace("_", " ").title()
-    if item_name in item_mappings:
-        item_name = item_mappings[item_name]
-    return f"[[File:{item_name}.png|23px|middle]]"
+# sane representation of floats that rounds where appropriate to not show crazy
+# decimal places to users.
+# TODO this probably rounds to much at the low end, e.g. beacons go from
+# 0.0000037037 -> 0.004%. Our worst case should be two decimals *of precision*,
+# not any two decimals period.
+def float_to_string(val):
+    assert round(val, 12) != 0
+    v = val
+    # take the least precise variant that doesn't round to 0, or show to 2
+    # decimal places otherwise.
+    # TODO as above, this should be 2 decimal places *of precision* otherwise.
+    # might be a bit tricky.
+    for i in reversed(range(2, 12)):
+        if round(val, i) == 0:
+            break
+        v = round(val, i)
 
-def quantity_cell(quantities):
-    # can happen for random outputs, where output is None but outputs is set
-    if quantities is None:
-        return "TODO"
-    return ", ".join(f"{c.amount} {image(c.material)}" for c in quantities)
+    return f"{v:.12f}".rstrip("0").rstrip(".")
 
-def fuel_cost(config, recipe):
-    return recipe.production_time * config.default_fuel_consumption_intervall
 
-def time_cell(recipe):
-    return recipe.production_time
+class FactoryModPrinter:
+    def __init__(self, config: Config, factory: Factory):
+        self.config = config
+        self.factory = factory
+        # recipes with randomized outputs. These get their own tables at the end,
+        # as their outputs can be quite long.
+        self.random_recipes = []
+        self.output = ""
 
-def fuel_cell(config, recipe):
-    cost = fuel_cost(config, recipe)
-    # TODO support displaying multiple default fuels, by cycling through them
-    # in a gif. look at how minecraft.wiki does variable recipes
-    return f"{cost} {image(config.default_fuel[0].material)}"
+    def write(self, text):
+        self.output += text
 
-def repair_recipes(config, factory):
-    repair_recipes = [r for r in factory.recipes if r.type is RecipeType.REPAIR]
+    def get_value(self):
+        self.write(self.meta_table())
+        self.write("\n\n")
+        self.write(self.recipes_table())
 
-    return "".join(f"""
-        |-
-        |{quantity_cell(r.input)}
-        |{r.health_gained}
-        |{time_cell(r)}
-        |{fuel_cell(config, r)}""" for r in repair_recipes)
+        # write any random recipe tables that got added as a result of creating the
+        # recipes table
+        random_tables = self.random_recipes_tables()
+        if random_tables:
+            self.write("\n\n")
+            self.write(random_tables)
 
-def recipes(config, factory):
-    non_production_types = [RecipeType.UPGRADE, RecipeType.REPAIR]
-    recipes = [r for r in factory.recipes if r.type not in non_production_types]
-    return "".join(f"""
-        |-
-        |{r.name}
-        |{quantity_cell(r.input)}
-        |{quantity_cell(r.output)}
-        |{time_cell(r)}
-        |{fuel_cell(config, r)}""" for r in recipes)
+        return self.output
 
-def upgrades_from_to(config, factory):
-    upgrades_from = config.upgrades_from[factory.name]
-    upgrades_to = config.upgrades_to[factory.name]
+    def image(self, item_name):
+        item_name = item_name.replace("_", " ").title()
+        if item_name in item_mappings:
+            item_name = item_mappings[item_name]
+        return f"[[File:{item_name}.png|23px|middle]]"
 
-    rows = []
+    def quantity_cell(self, quantities):
+        return ", ".join(f"{c.amount} {self.image(c.material)}" for c in quantities)
 
-    # number of upgrades to / from recipes might be imbalanced. Pad whichever
-    # is lowest with {n/a} rows
-    for i in range(max(len(upgrades_from), len(upgrades_to))):
-        (r_from, f_from) = upgrades_from[i] if i < len(upgrades_from) else (None, None)
-        (r_to, f_to) = upgrades_to[i] if i < len(upgrades_to) else (None, None)
-        row = f"""
+    def recipe_quantity_cell(self, recipe, type):
+        if type == "input":
+            return self.quantity_cell(recipe.input)
+        if type == "output":
+            if recipe.output != []:
+                return self.quantity_cell(recipe.output)
+
+            assert recipe.outputs is not None
+            self.random_recipes.append(recipe)
+            # we'll create this anchor when we create the table for this recipe
+            # later. As a random recipe, it gets its own table.
+            return f"[[#{recipe.name}|{recipe.name}]]"
+
+    def fuel_cost(self, recipe):
+        return recipe.production_time * self.config.default_fuel_consumption_intervall
+
+    def time_cell(self, recipe):
+        return recipe.production_time
+
+    def fuel_cell(self, recipe):
+        cost = self.fuel_cost(recipe)
+        # TODO support displaying multiple default fuels, by cycling through them
+        # in a gif. look at how minecraft.wiki does variable recipes
+        return f"{cost} {self.image(self.config.default_fuel[0].material)}"
+
+    def repair_recipes(self):
+        repair_recipes = [r for r in self.factory.recipes if r.type is RecipeType.REPAIR]
+
+        return "".join(f"""
             |-
-            |{f"{f_from.name}\n|{quantity_cell(r_from.input)}" if f_from else " colspan=\"2\" {{n/a}}"}
-            |{f"{f_to.name}\n|{quantity_cell(r_to.input)}" if f_to else " colspan=\"2\" {{n/a}}"}
-        """
+            |{self.recipe_quantity_cell(r, "input")}
+            |{r.health_gained}
+            |{self.time_cell(r)}
+            |{self.fuel_cell(r)}""" for r in repair_recipes)
 
-        rows.append(row)
-
-    table = """
-        |-
-        !Upgrades From
-        !Cost
-        !Upgrades To
-        !Cost
-    """.strip()
-    if not rows:
-        table += """
+    def recipes(self):
+        non_production_types = [RecipeType.UPGRADE, RecipeType.REPAIR]
+        recipes = [r for r in self.factory.recipes if r.type not in non_production_types]
+        return "".join(f"""
             |-
-            | colspan=\"2\" {{n/a}}
-            | colspan=\"2\" {{n/a}}"""
-    table += "".join(rows)
-    return table
+            |{r.name}
+            |{self.recipe_quantity_cell(r, "input")}
+            |{self.recipe_quantity_cell(r, "output")}
+            |{self.time_cell(r)}
+            |{self.fuel_cell(r)}""" for r in recipes)
 
-# creation cost and repair recipes
-def meta_table(config: Config, factory: Factory):
-    return f"""
-        {{| class="wikitable"
-        |+
-        ! colspan="4" |Creation Cost
-        |-
-        | colspan="4" {f"|{quantity_cell(factory.setupcost)}" if factory.setupcost else "{{n/a}}"}
-        |-
-        ! colspan="4" |Repair Cost
-        |-
-        !Cost
-        !Health Repaired
-        !Time
-        !Fuel
-        {repair_recipes(config, factory)}
-        {upgrades_from_to(config, factory)}
-        |}}
-    """.strip()
+    def upgrades_from_to(self):
+        upgrades_from = self.config.upgrades_from[self.factory.name]
+        upgrades_to = self.config.upgrades_to[self.factory.name]
 
-def recipes_table(config: Config, factory: Factory):
-    return f"""
-        {{| class="wikitable"
-        !Recipe
-        !Input
-        !Output
-        !Time
-        !Fuel
-        {recipes(config, factory)}
-        |}}
-    """.strip()
+        rows = []
+
+        # number of upgrades to / from recipes might be imbalanced. Pad whichever
+        # is lowest with {n/a} rows
+        for i in range(max(len(upgrades_from), len(upgrades_to))):
+            (r_from, f_from) = upgrades_from[i] if i < len(upgrades_from) else (None, None)
+            (r_to, f_to) = upgrades_to[i] if i < len(upgrades_to) else (None, None)
+            row = f"""
+                |-
+                |{f"{f_from.name}\n|{self.recipe_quantity_cell(r_from, "input")}" if f_from else " colspan=\"2\" {{n/a}}"}
+                |{f"{f_to.name}\n|{self.recipe_quantity_cell(r_to, "input")}" if f_to else " colspan=\"2\" {{n/a}}"}
+            """
+
+            rows.append(row)
+
+        table = """
+            |-
+            !Upgrades From
+            !Cost
+            !Upgrades To
+            !Cost
+        """.strip()
+        if not rows:
+            table += """
+                |-
+                | colspan=\"2\" {{n/a}}
+                | colspan=\"2\" {{n/a}}"""
+        table += "".join(rows)
+        return table
+
+    # creation cost and repair recipes
+    def meta_table(self):
+        return f"""
+            {{| class="wikitable"
+            |+
+            ! colspan="4" |Creation Cost
+            |-
+            | colspan="4" {f"|{self.quantity_cell(self.factory.setupcost)}" if self.factory.setupcost else "{{n/a}}"}
+            |-
+            ! colspan="4" |Repair Cost
+            |-
+            !Cost
+            !Health Repaired
+            !Time
+            !Fuel
+            {self.repair_recipes()}
+            {self.upgrades_from_to()}
+            |}}
+        """.strip()
+
+    def recipes_table(self):
+        return f"""
+            {{| class="wikitable"
+            !Recipe
+            !Input
+            !Output
+            !Time
+            !Fuel
+            {self.recipes()}
+            |}}
+        """.strip()
+
+    def random_recipe_cells(self, recipe):
+        assert recipe.outputs
+
+        return "".join(f"""
+            |-
+            |{float_to_string(random_output.chance * 100)}%
+            |{self.quantity_cell(random_output.quantities)}"""
+            for random_output in recipe.outputs
+        )
+
+    def random_recipes_tables(self):
+        out = ""
+        for random_recipe in self.random_recipes:
+            out += f"""
+            {{| class="wikitable"
+            |+{{{{anchor|{random_recipe.name}}}}} {random_recipe.name}
+            !Probability
+            !Drops
+            {self.random_recipe_cells(random_recipe)}
+            |}}
+        """.strip()
+
+        return out
 
 def update_factory(config, factory, *, confirm=False, dry=False):
-    meta_t = meta_table(config, factory)
-    recipes_t = recipes_table(config, factory)
-    new_text = f"{meta_t}\n\n{recipes_t}"
+    printer = FactoryModPrinter(config, factory)
+    new_text = printer.get_value()
 
     # --server may be passed as e.g. civclassic 2.0, but the template page
     # exists at CivClassic 2.0.
