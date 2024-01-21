@@ -101,16 +101,22 @@ class FactoryModPrinter:
 
     def recipe_quantity_cell(self, recipe, type):
         if type == "input":
-            return self.quantity_cell(recipe.input)
+            if recipe.input:
+                return self.quantity_cell(recipe.input)
+            else:
+                # TODO: "decompact"
+                return "TODO"
         if type == "output":
-            if recipe.output != []:
+            if recipe.output:
                 return self.quantity_cell(recipe.output)
-
-            assert recipe.outputs is not None
-            self.random_recipes.append(recipe)
-            # we'll create this anchor when we create the table for this recipe
-            # later. As a random recipe, it gets its own table.
-            return f"[[#{recipe.name}|{recipe.name}]]"
+            elif recipe.outputs:
+                self.random_recipes.append(recipe)
+                # we'll create this anchor when we create the table for this recipe
+                # later. As a random recipe, it gets its own table.
+                return f"[[#{recipe.name}|{recipe.name}]]"
+            else:
+                # TODO: "print note" / "compact"
+                return "TODO"
 
     def fuel_cost(self, recipe):
         return recipe.production_time * self.config.default_fuel_consumption_intervall
