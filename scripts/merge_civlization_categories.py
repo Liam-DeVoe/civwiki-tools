@@ -19,6 +19,8 @@ replacements = {
         ("CivMC", "Civilizations (CivMC)"),
         ("CivClassic 2.0", "Civilizations (CivClassic 2.0)"),
         ("CivRealms 2.0", "Civilizations (CivRealms 2.0)"),
+        ("Civcraft 1.0", "Civilizations (Civcraft 1.0)"),
+        ("Civcraft 2.0", "Civilizations (Civcraft 2.0)"),
         ("Civcraft 3.0", "Civilizations (Civcraft 3.0)"),
         ("Devoted 3.0", "Civilizations (Devoted 3.0)"),
         ("Civ+", "Civilizations (Civ+)"),
