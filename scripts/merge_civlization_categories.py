@@ -26,6 +26,8 @@ replacements = {
         ("Civ+", "Civilizations (Civ+)"),
         ("CivCubed", "Civilizations (CivCubed)"),
         ("CivRev", "Civilizations (CivRev)"),
+        ("CivUniverse", "Civilizations (CivUniverse)"),
+        ("Vintage Civ", "Civilizations (Vintage Civ)"),
     ]
 }
 
