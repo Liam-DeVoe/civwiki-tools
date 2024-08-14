@@ -9,7 +9,7 @@ from civwiki_tools import site
 # takes a page with e.g.
 #   [[Category:CivMC]]
 #   [[Category:Civilizations]]
-# and replaces it with
+# and replaces both with
 #   [[Category: Civilizations (CivMC)]]
 
 civ_category = Category(site, "Category:Civilizations")
