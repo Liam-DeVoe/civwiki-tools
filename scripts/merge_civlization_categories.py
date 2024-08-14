@@ -24,6 +24,8 @@ replacements = {
         ("Civcraft 3.0", "Civilizations (Civcraft 3.0)"),
         ("Devoted 3.0", "Civilizations (Devoted 3.0)"),
         ("Civ+", "Civilizations (Civ+)"),
+        ("CivCubed", "Civilizations (CivCubed)"),
+        ("CivRev", "Civilizations (CivRev)"),
     ]
 }
 
