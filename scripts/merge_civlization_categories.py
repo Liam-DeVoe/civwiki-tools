@@ -30,6 +30,7 @@ replacements = {
         ("Vintage Civ", "Civilizations (Vintage Civ)"),
         ("CivReign", "Civilizations (CivReign)"),
         ("Devoted Hell", "Civilizations (Devoted Hell)"),
+        ("Civtest", "Civilizations (Civtest)"),
     ]
 }
 
