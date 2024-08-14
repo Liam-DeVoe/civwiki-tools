@@ -41,6 +41,10 @@ def merge_categories():
         for server_category, new_civ_category in replacements.items():
             if server_category not in categories:
                 continue
+            if new_civ_category in categories:
+                skip = True
+                print(f"  already has category {new_civ_category}, skipping")
+                break
             if found is not None:
                 print(f"  found multiple server categories in {categories}, skipping")
                 skip = True
