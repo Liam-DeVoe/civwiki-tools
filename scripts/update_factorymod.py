@@ -1,6 +1,7 @@
 # example usage:
-# python3 scripts/update_factorymod.py --server "civclassic 2.0"
+# python3 scripts/update_factorymod.py --server "civclassic 2.0" --factory all
 # python3 scripts/update_factorymod.py --server "civclassic 2.0" --factory "Ore Smelter"
+# python3 scripts/update_factorymod.py --server "civmc" --factory all --dry
 
 from argparse import ArgumentParser
 
@@ -217,7 +218,7 @@ class FactoryModPrinter:
             |-
             |{float_to_string(random_output.chance * 100)}%
             |{self.quantity_cell(random_output.quantities)}"""
-            for random_output in recipe.outputs
+            for random_output in sorted(recipe.outputs, key=lambda output: -output.chance)
         )
 
     def random_recipes_tables(self):
