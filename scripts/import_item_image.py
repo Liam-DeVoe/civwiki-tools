@@ -15,6 +15,7 @@ from civwiki_tools import site
 MINECRAFT_BASE_URL = "https://minecraft.wiki"
 MINECRAFT_FILE_URL = f"{MINECRAFT_BASE_URL}/w/File:{{item_name}}.png"
 
+
 def guess_url(args):
     if args.url is not None:
         return args.url
@@ -34,6 +35,7 @@ def guess_url(args):
     image_url = soup.select(".fullMedia a")[0].get("href")
     return f"{MINECRAFT_BASE_URL}{image_url}"
 
+
 parser = ArgumentParser()
 parser.add_argument("name")
 parser.add_argument("url", nargs="?")
@@ -52,6 +54,6 @@ upload_bot = UploadRobot(
     keep_filename=True,
     description=description,
     # prevent asking for description confirmation
-    verify_description=False
+    verify_description=False,
 )
 upload_bot.run()

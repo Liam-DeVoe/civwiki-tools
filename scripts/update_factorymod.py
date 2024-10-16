@@ -14,21 +14,19 @@ from civwiki_tools import site
 config_files = {
     "civcraft 3.0": RESOURCES / "civcraft 3.0.yaml",
     "civclassic 2.0": RESOURCES / "civclassic 2.0.yaml",
-    "civmc": RESOURCES / "civmc.yaml"
+    "civmc": RESOURCES / "civmc.yaml",
 }
 # --server may be passed as e.g. civclassic 2.0, but the template page
 # exists at CivClassic 2.0.
 wiki_server_names = {
     "civcraft": "Civcraft",
     "civclassic": "CivClassic",
-    "civmc": "CivMC"
+    "civmc": "CivMC",
 }
 
-# not sure where some of these servers got some of these names. Did "Oak Log"
-# and "Oak Planks" really used to be called "Log" and "Wood"?
 item_mappings = {
     # for civcraft 3.0
-    # TODO should we move these to redirects wiki-side instead?
+    # TODO we should move these redirects to wiki-side instead
     "Log": "Oak Log",
     "Wood": "Oak Planks",
     "Wool": "White Wool",
@@ -37,6 +35,7 @@ item_mappings = {
 }
 
 page_title = "Template:FactoryModConfig_{factory}_({server})"
+
 
 # sane representation of floats that rounds where appropriate to not show crazy
 # decimal places to users.
@@ -125,25 +124,35 @@ class FactoryModPrinter:
         return f"{cost} {self.image(self.config.default_fuel[0].material)}"
 
     def repair_recipes(self):
-        repair_recipes = [r for r in self.factory.recipes if r.type is RecipeType.REPAIR]
+        repair_recipes = [
+            r for r in self.factory.recipes if r.type is RecipeType.REPAIR
+        ]
 
-        return "".join(f"""
+        return "".join(
+            f"""
             |-
             |{self.recipe_quantity_cell(r, "input")}
             |{r.health_gained}
             |{self.time_cell(r)}
-            |{self.fuel_cell(r)}""" for r in repair_recipes)
+            |{self.fuel_cell(r)}"""
+            for r in repair_recipes
+        )
 
     def recipes(self):
         non_production_types = [RecipeType.UPGRADE, RecipeType.REPAIR]
-        recipes = [r for r in self.factory.recipes if r.type not in non_production_types]
-        return "".join(f"""
+        recipes = [
+            r for r in self.factory.recipes if r.type not in non_production_types
+        ]
+        return "".join(
+            f"""
             |-
             |{r.name}
             |{self.recipe_quantity_cell(r, "input")}
             |{self.recipe_quantity_cell(r, "output")}
             |{self.time_cell(r)}
-            |{self.fuel_cell(r)}""" for r in recipes)
+            |{self.fuel_cell(r)}"""
+            for r in recipes
+        )
 
     def upgrades_from_to(self):
         upgrades_from = self.config.upgrades_from[self.factory.name]
@@ -154,7 +163,9 @@ class FactoryModPrinter:
         # number of upgrades to / from recipes might be imbalanced. Pad whichever
         # is lowest with {n/a} rows
         for i in range(max(len(upgrades_from), len(upgrades_to))):
-            (r_from, f_from) = upgrades_from[i] if i < len(upgrades_from) else (None, None)
+            (r_from, f_from) = (
+                upgrades_from[i] if i < len(upgrades_from) else (None, None)
+            )
             (r_to, f_to) = upgrades_to[i] if i < len(upgrades_to) else (None, None)
             row = f"""
                 |-
@@ -214,26 +225,32 @@ class FactoryModPrinter:
     def random_recipe_cells(self, recipe):
         assert recipe.outputs
 
-        return "".join(f"""
+        return "".join(
+            f"""
             |-
             |{float_to_string(random_output.chance * 100)}%
             |{self.quantity_cell(random_output.quantities)}"""
-            for random_output in sorted(recipe.outputs, key=lambda output: -output.chance)
+            for random_output in sorted(
+                recipe.outputs, key=lambda output: -output.chance
+            )
         )
 
     def random_recipes_tables(self):
         tables = []
         for random_recipe in self.random_recipes:
-            tables.append(f"""
+            tables.append(
+                f"""
             {{| class="wikitable"
             |+{{{{anchor|{random_recipe.name}}}}} {random_recipe.name}
             !Probability
             !Drops
             {self.random_recipe_cells(random_recipe)}
             |}}
-        """.strip())
+        """.strip()
+            )
 
         return "\n\n".join(tables)
+
 
 def update_factory(config, factory, *, confirm=False, dry=False):
     printer = FactoryModPrinter(config, factory)
@@ -273,6 +290,7 @@ def update_factory(config, factory, *, confirm=False, dry=False):
             print(f"ignoring exception {e}. Relogging...")
             relog()
 
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--server", required=True)
@@ -281,8 +299,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.server not in config_files:
-        raise ValueError(f"invalid server {args.server}. Expected one of "
-            f"{list(config_files.keys())}")
+        raise ValueError(
+            f"invalid server {args.server}. Expected one of "
+            f"{list(config_files.keys())}"
+        )
 
     config_file = config_files[args.server]
     with open(config_file) as f:
@@ -294,8 +314,10 @@ if __name__ == "__main__":
     else:
         factories = [f for f in config.factories if f.name == args.factory]
         if not factories:
-            raise ValueError(f"no factory named {args.factory}. Expected one of "
-                f"{[f.name for f in config.factories]}")
+            raise ValueError(
+                f"no factory named {args.factory}. Expected one of "
+                f"{[f.name for f in config.factories]}"
+            )
 
     for factory in factories:
         update_factory(config, factory, dry=args.dry)

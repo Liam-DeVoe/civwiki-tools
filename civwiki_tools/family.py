@@ -1,5 +1,6 @@
 from pywikibot import Family as _Family
 
+
 class CivwikiFamily(_Family):
     name = "civwiki"
     langs = {
@@ -8,6 +9,7 @@ class CivwikiFamily(_Family):
 
     def scriptpath(self, code):
         return "/w"
+
 
 # pywikibot requires that the family defined here be named Family. Leaving an
 # alias works just as well.

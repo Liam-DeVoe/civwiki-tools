@@ -3,6 +3,7 @@ from typing import get_type_hints, get_origin, get_args
 from dataclasses import dataclass
 from collections import defaultdict
 
+
 def parse_list(ModelClass, data):
     models = []
     for key, value in data.items():
@@ -11,10 +12,12 @@ def parse_list(ModelClass, data):
         models.append(v)
     return models
 
+
 # fields with a value of SPECIAL_PARSING will be parsed in a particular
 # hardcoded way that is not worth generalizing or making abstract.
 # yes, this is a hack. no, I'm not sorry.
 SPECIAL_PARSING_1 = object()
+
 
 class Model:
     def __init_subclass__(cls):
@@ -55,6 +58,7 @@ class Model:
             kwargs[attr] = v
         return cls(**kwargs)
 
+
 # https://github.com/DevotedMC/CivModCore/blob/ad94009362cfc28d9de4a093d6c966cd0
 # 6d09c46/src/main/java/vg/civcraft/mc/civmodcore/util/ConfigParsing.java#L227
 class Duration:
@@ -83,8 +87,9 @@ class Duration:
                 # 20 ticks per second
                 seconds += 0.05 * int(buffer)
             else:
-                raise ValueError(f"unimplemented duration identifier {c} "
-                    f"(from {val})")
+                raise ValueError(
+                    f"unimplemented duration identifier {c} " f"(from {val})"
+                )
         self.seconds = seconds
 
     def __int__(self):
@@ -97,7 +102,9 @@ class Duration:
 
     def __str__(self):
         return str(self.seconds)
+
     __repr__ = __str__
+
 
 class RecipeType(Enum):
     UPGRADE = "UPGRADE"
@@ -119,12 +126,14 @@ class RecipeType(Enum):
     LOREENCHANT = "LOREENCHANT"
     COSTRETURN = "COSTRETURN"
 
+
 class FactoryType(Enum):
     # furnace, chest, crafting table
     FCC = "FCC"
     FCCUPGRADE = "FCCUPGRADE"
     PIPE = "PIPE"
     SORTER = "SORTER"
+
 
 class Quantity(Model):
     material: str
@@ -135,6 +144,7 @@ class Quantity(Model):
     amount: int = 1
     lore: list[str]
 
+
 class RecipeRandomOutput(Model):
     chance: float
     # this isn't actually represented as a list in the yaml, and we don't
@@ -142,6 +152,7 @@ class RecipeRandomOutput(Model):
     # recipe name, which could be anything like dragon_egg). use a custom parser
     # for it.
     quantities: list[Quantity] = SPECIAL_PARSING_1
+
 
 class Recipe(Model):
     production_time: Duration
@@ -162,6 +173,7 @@ class SetupCost(Model):
     material: str
     amount: int
 
+
 class Factory(Model):
     type: FactoryType
     name: str
@@ -169,8 +181,10 @@ class Factory(Model):
     setupcost: list[SetupCost]
     recipes: list[str]
 
+
 class Fuel(Model):
     material: str
+
 
 class Config(Model):
     default_update_time: Duration
@@ -194,6 +208,7 @@ class Config(Model):
     # upgrades_to: dict[str, list[(recipe, Factory)]]
     # upgrades_from: dict[str, list[(recipe, Factory)]]
 
+
 def parse_factorymod(data):
     """
     Parse a .yaml factorymod config.
@@ -207,8 +222,10 @@ def parse_factorymod(data):
         factory.recipes = []
         for recipe_name in factory_recipes:
             if recipe_name not in recipes:
-                print(f"Could not find recipe {recipe_name} (from factory "
-                    f"{factory.name}) in list of recipes. Skipping")
+                print(
+                    f"Could not find recipe {recipe_name} (from factory "
+                    f"{factory.name}) in list of recipes. Skipping"
+                )
                 continue
             factory.recipes.append(recipes[recipe_name])
 

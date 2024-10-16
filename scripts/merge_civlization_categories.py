@@ -79,7 +79,9 @@ def merge_categories():
             f"Merging categories [[{civ_category_title}]] + [[{found["server_cat"]}]] "
             f"-> [[{found["new_civ_cat"]}]]"
         )
-        diff = "\n".join(difflib.unified_diff(old_text.split("\n"), page.text.split("\n")))
+        diff = "\n".join(
+            difflib.unified_diff(old_text.split("\n"), page.text.split("\n"))
+        )
         print(f"  {summary}")
         print(f"  diff: {diff}")
 
@@ -89,5 +91,6 @@ def merge_categories():
             print("  ...saved")
         except pywikibot.exceptions.Error as e:
             print(f"  error saving changes: {e}")
+
 
 merge_categories()
