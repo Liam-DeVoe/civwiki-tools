@@ -4,11 +4,18 @@
 # python3 scripts/update_factorymod.py --server "civmc" --factory all --dry
 
 from argparse import ArgumentParser
+from typing import Any
 
 import yaml
 
 from civwiki_tools import site
-from civwiki_tools.factorymod import Config, Factory, RecipeType, parse_factorymod
+from civwiki_tools.factorymod import (
+    Config,
+    Factory,
+    Quantity,
+    RecipeType,
+    parse_factorymod,
+)
 from civwiki_tools.utils import RESOURCES, relog
 
 config_files = {
@@ -83,17 +90,34 @@ class FactoryModPrinter:
 
         return self.output
 
-    def image(self, item_name):
+    def image(self, item_name, *, hover_text: str | None = None):
         item_name = item_name.replace("_", " ").title()
         if item_name in item_mappings:
             item_name = item_mappings[item_name]
+
+        if hover_text:
+            return f"[[File:{item_name}.png|23px|middle|{hover_text}]]"
+
         return f"[[File:{item_name}.png|23px|middle]]"
 
-    def quantity_cell(self, quantities):
-        return ", ".join(
-            f"{c.amount} {self.image(c.custom_key or c.type or c.material)}"
-            for c in quantities
-        )
+    def quantity_cell(self, quantities: list[Any]):
+        parts = []
+        for quantity in quantities:
+            item_name = quantity.custom_key or quantity.type or quantity.material
+            hover_text = (
+                ", ".join(
+                    f"{e.enchant.replace('_', ' ').title()} {e.level}"
+                    for e in quantity.enchantments
+                )
+                if isinstance(quantity, Quantity) and quantity.enchantments
+                else None
+            )
+
+            parts.append(
+                f"{quantity.amount} {self.image(item_name, hover_text=hover_text)}"
+            )
+
+        return ", ".join(parts)
 
     def recipe_quantity_cell(self, recipe, type):
         if type == "input":

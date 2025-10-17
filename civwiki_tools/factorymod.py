@@ -17,9 +17,8 @@ def parse_list(ModelClass, data):
 # hardcoded way that is not worth generalizing or making abstract.
 # yes, this is a hack. no, I'm not sorry.
 SPECIAL_PARSING_1 = object()
-field_name_overrides = {
-    "custom_key": "custom-key"
-}
+field_name_overrides = {"custom_key": "custom-key"}
+
 
 class Model:
     def __init_subclass__(cls):
@@ -146,6 +145,11 @@ class FactoryType(Enum):
     SORTER = "SORTER"
 
 
+class Enchantment(Model):
+    enchant: str
+    level: int
+
+
 class Quantity(Model):
     material: str
     # amount defaults to 1. At least for civcraft; I haven't checked devoted.
@@ -155,9 +159,31 @@ class Quantity(Model):
     amount: int = 1
     lore: list[str]
 
-    # new ItemStack format fields (optional, for newer configs)
-    type: str  # replaces 'material' in new format
+    type: str  # replaces 'material' in civmc config
     custom_key: str  # for custom items
+
+    enchantments: list[Enchantment]
+
+    @classmethod
+    def parse(cls, data):
+        quantity = super().parse(data)
+
+        enchantments = []
+        if "stored_enchants" in data:
+            # civclassic/civcraft: stored_enchants dict of {key: {enchant: name, level: num}}
+            enchantments = [
+                Enchantment.parse(enchant_data)
+                for enchant_data in data["stored_enchants"].values()
+            ]
+        elif "meta" in data and "stored-enchants" in data["meta"]:
+            # civmc: meta.stored-enchants dict of {enchant_name: level}
+            enchantments = [
+                Enchantment(enchant=name, level=level)
+                for name, level in data["meta"]["stored-enchants"].items()
+            ]
+
+        quantity.enchantments = enchantments
+        return quantity
 
 
 class RecipeRandomOutput(Model):
