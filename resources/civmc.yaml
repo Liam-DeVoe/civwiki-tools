@@ -11716,7 +11716,7 @@ recipes:
     production_time: 4s
     fuel_consumption_intervall: 4s
     word_count: 3
-    seed: "${CIV_WORDBANK_SEED}"
+    seed: "wordbank"
     colors:
       - YELLOW
       - LIGHT_PURPLE
