@@ -1,7 +1,7 @@
-from enum import Enum
-from typing import get_type_hints, get_origin, get_args
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
+from enum import Enum
+from typing import get_args, get_origin, get_type_hints
 
 
 def parse_list(ModelClass, data):
@@ -17,7 +17,9 @@ def parse_list(ModelClass, data):
 # hardcoded way that is not worth generalizing or making abstract.
 # yes, this is a hack. no, I'm not sorry.
 SPECIAL_PARSING_1 = object()
-
+field_name_overrides = {
+    "custom_key": "custom-key"
+}
 
 class Model:
     def __init_subclass__(cls):
@@ -34,8 +36,12 @@ class Model:
                 kwargs[attr] = parse_list(get_args(type_)[0], val)
                 continue
 
+            # yaml sometimes has invalid python identifiers, like custom-key.
+            # override our lookup names for those
+            yaml_key = field_name_overrides.get(attr, attr)
+
             # optional keys. e.g. setupcost is not required for factories
-            if attr not in data:
+            if yaml_key not in data:
                 # default to [] for lists
                 default = None if get_origin(type_) is not list else []
                 # individual attributes can specify defaults
@@ -43,7 +49,7 @@ class Model:
                 kwargs[attr] = default
                 continue
 
-            val = data[attr]
+            val = data[yaml_key]
 
             # uncomment for debugging
             # print(f"processing {attr}: {type_}, value {val}")
@@ -126,6 +132,11 @@ class RecipeType(Enum):
     LOREENCHANT = "LOREENCHANT"
     COSTRETURN = "COSTRETURN"
 
+    # used by civmc
+    HELIODOR_CREATE = "HELIODOR_CREATE"
+    HELIODOR_FINISH = "HELIODOR_FINISH"
+    HELIODOR_REFILL = "HELIODOR_REFILL"
+
 
 class FactoryType(Enum):
     # furnace, chest, crafting table
@@ -143,6 +154,10 @@ class Quantity(Model):
     # #L194
     amount: int = 1
     lore: list[str]
+
+    # new ItemStack format fields (optional, for newer configs)
+    type: str  # replaces 'material' in new format
+    custom_key: str  # for custom items
 
 
 class RecipeRandomOutput(Model):
@@ -173,6 +188,20 @@ class SetupCost(Model):
     material: str
     amount: int
 
+    # in civmc config, items look like:
+    #
+    #   charcoal:
+    #       v: 3839
+    #       ==: org.bukkit.inventory.ItemStack
+    #       type: CHARCOAL
+    #
+    # in civclassic/civcraft, they look like:
+    #
+    #   charcoal:
+    #       material: CHARCOAL
+    type: str  # optional, replaces 'material' in civmc
+    custom_key: str  # optional, eg civmc heliodor
+
 
 class Factory(Model):
     type: FactoryType
@@ -184,6 +213,7 @@ class Factory(Model):
 
 class Fuel(Model):
     material: str
+    type: str  # optional, replaces 'material' in civmc
 
 
 class Config(Model):

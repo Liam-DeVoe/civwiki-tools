@@ -90,7 +90,10 @@ class FactoryModPrinter:
         return f"[[File:{item_name}.png|23px|middle]]"
 
     def quantity_cell(self, quantities):
-        return ", ".join(f"{c.amount} {self.image(c.material)}" for c in quantities)
+        return ", ".join(
+            f"{c.amount} {self.image(c.custom_key or c.type or c.material)}"
+            for c in quantities
+        )
 
     def recipe_quantity_cell(self, recipe, type):
         if type == "input":
@@ -121,7 +124,8 @@ class FactoryModPrinter:
         cost = self.fuel_cost(recipe)
         # TODO support displaying multiple default fuels, by cycling through them
         # in a gif. look at how minecraft.wiki does variable recipes
-        return f"{cost} {self.image(self.config.default_fuel[0].material)}"
+        fuel = self.config.default_fuel[0]
+        return f"{cost} {self.image(fuel.type or fuel.material)}"
 
     def repair_recipes(self):
         repair_recipes = [
