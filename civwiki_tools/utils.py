@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pywikibot.config import family_files
 from pywikibot import Site as _Site
+from pywikibot.config import family_files
 
 from civwiki_tools import family
 from civwiki_tools.site import Site

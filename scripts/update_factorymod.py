@@ -7,9 +7,9 @@ from argparse import ArgumentParser
 
 import yaml
 
-from civwiki_tools.utils import RESOURCES, relog
-from civwiki_tools.factorymod import parse_factorymod, RecipeType, Factory, Config
 from civwiki_tools import site
+from civwiki_tools.factorymod import Config, Factory, RecipeType, parse_factorymod
+from civwiki_tools.utils import RESOURCES, relog
 
 config_files = {
     "civcraft 3.0": RESOURCES / "civcraft 3.0.yaml",

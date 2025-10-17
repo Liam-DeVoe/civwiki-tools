@@ -1,8 +1,9 @@
-import re
 import difflib
+import re
 
 import pywikibot
 from pywikibot import Page
+
 from civwiki_tools import site
 
 

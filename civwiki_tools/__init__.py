@@ -1,10 +1,9 @@
 from pathlib import Path
 
-from pywikibot.login import ClientLoginManager
 from pywikibot.config import usernames
+from pywikibot.login import ClientLoginManager
 
 from civwiki_tools.utils import site
-
 
 __all__ = ["site"]
 

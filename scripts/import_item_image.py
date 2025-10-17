@@ -5,12 +5,11 @@
 
 from argparse import ArgumentParser
 
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
 from pywikibot.specialbots import UploadRobot
 
 from civwiki_tools import site
-
 
 MINECRAFT_BASE_URL = "https://minecraft.wiki"
 MINECRAFT_FILE_URL = f"{MINECRAFT_BASE_URL}/w/File:{{item_name}}.png"

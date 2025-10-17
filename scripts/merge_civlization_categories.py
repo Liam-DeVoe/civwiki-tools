@@ -3,8 +3,8 @@ import difflib
 import pywikibot
 import pywikibot.textlib
 from pywikibot import Category
-from civwiki_tools import site
 
+from civwiki_tools import site
 
 # takes a page with e.g.
 #   [[Category:CivMC]]
