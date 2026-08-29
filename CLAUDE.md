@@ -34,10 +34,6 @@ All scripts are standalone and meant to be run directly:
 - **`merge_civlization_categories.py`**: Consolidates server and civilization categories
 - **`regex_edit_backlinks.py`**: Template for regex-based mass edits on pages linking to a target
 
-### Utility Files
-
-- **`batch.py`**: Simple line-by-line processor that reads `input.txt` and runs `import_item_image.py` for each line
-
 ## Development Commands
 
 ### Setup
@@ -75,15 +71,19 @@ python3 scripts/regex_edit_backlinks.py
 
 ## Important Implementation Details
 
-### Edit Summaries
+### Making Wiki Edits
 
-If Claude is told to use Tybot to make an edit to the wiki, prefix the edit summary with `claude: ` — e.g. `claude: replace dead links` - unless told otherwise.
+```python
+from civwiki_tools import site  # importing triggers login
 
-### Pywikibot Integration
+page = site.page("Some Page")
+page.text = new_text
+page.save(summary="claude: replace dead links")
+```
 
-- The library is not designed to be imported as a standard package. Importing `civwiki_tools` triggers authentication and login.
-- The `site` object in `civwiki_tools.utils` is the authenticated API interface used by all scripts.
-- `relog()` must be called if token-related errors occur (pywikibot's session management is fragile).
+- Prefix edit summaries with `claude: ` unless told otherwise.
+- Treat scripts you write as throwaway by default: run them and delete them, unless it's clear from context (or an explicit ask) that the script should be kept for reuse.
+- Beyond the custom `site.page()`, `site` is a normal pywikibot `APISite` — standard pywikibot usage works.
 
 ### Wiki Template Generation
 
@@ -91,11 +91,3 @@ If Claude is told to use Tybot to make an edit to the wiki, prefix the edit summ
 - Server names are case-normalized (e.g., "civmc" → "CivMC")
 - Random recipe outputs get separate anchor-linked tables
 - Float formatting: strips unnecessary precision while avoiding scientific notation
-
-### Authentication Flow
-
-1. `user-config.py` is loaded by pywikibot (sets username)
-2. `config.py` is manually exec'd to get password
-3. `ClientLoginManager` performs login
-4. Site userinfo and tokens are force-refreshed (pywikibot caches anonymous session otherwise)
-5. Scripts import the pre-authenticated `site` object from `civwiki_tools`
