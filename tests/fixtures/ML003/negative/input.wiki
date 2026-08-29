@@ -1,3 +1,12 @@
 [[File:Foo.png|thumb|A normal caption]]
 [[File:Bar.png|frameless|upright=0.8|alt=Some alt|link=Main Page|Caption here]]
 [[File:Baz.png|x30px|Some [[linked]] caption]]
+[[File:Map.png|left|thumb|centre is honored as center]]
+[[File:Map.png|centre|thumb|caption]]
+[[File:Boroughs.png|left|thumb|416x416px|Boroughs.
+{| class="wikitable"
+!No.
+|-
+|'''1'''
+|Salisbury
+|}]]

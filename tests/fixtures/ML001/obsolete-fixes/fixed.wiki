@@ -1,3 +1,4 @@
 <code>mono</code> and <s>gone</s>.
 <span style="color:red;">warning</span>
 <div style="text-align:center;">middle</div>
+<span style="font-size:larger;">large</span> text

@@ -215,18 +215,6 @@ class SiteIndex:
         )
         return {r[0] for r in rows}
 
-    def categories_of(self, page: str) -> set[str]:
-        rows = self.db.execute(
-            "SELECT category FROM categories WHERE page = ?",
-            (normalize_title(page),),
-        )
-        return {r[0] for r in rows}
-
-    def parent_categories(self, category: str) -> set[str]:
-        """Categories that Category:X itself belongs to."""
-        category = normalize_title(category).removeprefix("Category:")
-        return self.categories_of(f"Category:{category}")
-
     def all_pages(
         self, ns: int = 0, include_redirects: bool = False
     ) -> Iterator[tuple[str, str]]:

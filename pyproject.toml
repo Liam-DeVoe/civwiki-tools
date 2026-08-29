@@ -17,5 +17,5 @@ civlint = "civlint.cli:main"
 packages = ["civwiki_tools", "civlint", "civlint.rules"]
 
 [tool.setuptools.package-data]
-civlint = ["data/*.tsv"]
+civlint = ["data/*.txt"]
 

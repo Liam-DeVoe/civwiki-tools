@@ -310,8 +310,15 @@ def pc008(ctx):
     in a known file extension. The upstream conversion of self-wiki URLs
     to wikilinks needs live site URLs and is not ported.
     """
+    def ext_double(m):
+        # a pipe inside [[https://...|label]] is the wikilink separator;
+        # kept verbatim it would be percent-encoded into the URL
+        url, _, label = m["url"].partition("|")
+        label = label.strip()
+        return f"[{url.strip()} {label}]" if label else f"[{url.strip()}]"
+
     cases = [
-        (_EXT_DOUBLE_RE, lambda m: f"[{m['url']}]"),
+        (_EXT_DOUBLE_RE, ext_double),
         (_EXT_PIPE_RE, lambda m: f"[{m['url']} {m['label']}]"),
         (_EXT_PIPE_EXTENSION_RE, lambda m: f"[{m['url']} {m['label']}]"),
     ]

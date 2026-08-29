@@ -35,10 +35,11 @@ def ml001(ctx):
     """Obsolete HTML tag: <font>, <center>, <tt>, <strike>, <big>.
 
     <tt> and <strike> pairs are renamed to <code> and <s> (safe). A
-    <font color=...> with no other attributes becomes a color: span, and a
-    bare <center> pair becomes a text-align:center div (both unsafe).
-    Anything else — <big>, font size/face, unmatched or self-closed tags —
-    is reported without a fix.
+    <font color=...> with no other attributes becomes a color: span, a
+    bare <center> pair becomes a text-align:center div, and a bare <big>
+    pair becomes a font-size:larger span (all unsafe). Anything else —
+    font size/face, unmatched or self-closed tags — is reported without
+    a fix.
     """
     for m in ctx.finditer(_OBSOLETE_RE):
         tag = m.group(1).lower()
@@ -66,6 +67,17 @@ def ml001(ctx):
                             '<div style="text-align:center;">',
                         ),
                         Edit(close.start(), close.end(), "</div>"),
+                    ],
+                    applicability=Applicability.UNSAFE,
+                )
+            elif tag == "big" and not attrs.strip() and simple_close:
+                fix = Fix(
+                    edits=[
+                        Edit(
+                            m.start(), m.end(),
+                            '<span style="font-size:larger;">',
+                        ),
+                        Edit(close.start(), close.end(), "</span>"),
                     ],
                     applicability=Applicability.UNSAFE,
                 )
@@ -130,9 +142,12 @@ def ml002(ctx):
 
 _IMAGE_KEYWORDS = {
     "thumb", "thumbnail", "frame", "framed", "frameless", "border", "left",
-    "right", "center", "none", "baseline", "sub", "super", "top", "text-top",
-    "middle", "bottom", "text-bottom", "upright",
+    "right", "center", "centre", "none", "baseline", "sub", "super", "top",
+    "text-top", "middle", "bottom", "text-bottom", "upright",
 }
+# a table inside a file caption is legal, and its row/cell pipes are not
+# param separators; pipe attribution is ambiguous, so skip the whole link
+_TABLE_IN_LINK_RE = re.compile(r"^\s*\{\|", re.M)
 _IMAGE_SIZE_RE = re.compile(r"\d+px|x\d+px|\d+x\d+px")
 _IMAGE_NAMED_RE = re.compile(
     r"(alt|link|page|class|lang|thumb|upright)\s*=", re.IGNORECASE
@@ -159,6 +174,8 @@ def ml003(ctx):
     takes to be the last unrecognized parameter. Any other unrecognized
     parameter is silently dropped when rendering, so it is reported here.
     No fix: the intent (typoed option? misplaced caption?) is unknowable.
+    Links whose caption holds table markup are skipped entirely: the
+    table's pipes are indistinguishable from param separators here.
     """
     for base, bend, link in ctx.node_spans(ctx.wikicode.filter_wikilinks()):
         if not FILE_PREFIX_RE.match(str(link.title)):
@@ -166,6 +183,8 @@ def ml003(ctx):
         if ctx.is_shielded(base, bend):
             continue
         inner = ctx.text[base + 2 : bend - 2]
+        if _TABLE_IN_LINK_RE.search(inner):
+            continue
         params = list(split_top_level(inner))[1:]  # first segment = title
         bogus = [(s, e) for s, e in params if not _is_image_option(inner[s:e])]
         for s, e in bogus[:-1]:  # last unrecognized param is the caption

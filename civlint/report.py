@@ -160,8 +160,7 @@ def generate(code, ns=0, limit=None, open_browser=False):
 <h1>{code}: {html.escape(rule.summary)}</h1>
 <pre style="color:#555">{html.escape(rule.doc)}</pre>
 <p><b>{total_findings}</b> findings on <b>{total_pages}</b> pages;
-fixes change <b>{changed_pages}</b> pages{shown}.
-Diffs show fixes at the <i>unsafe</i> tier. Dry run — nothing has been edited.</p>
+fixes change <b>{changed_pages}</b> pages{shown}.</p>
 {"".join(sections)}
 </body></html>""")
     print(f"{code}: {total_findings} findings, {total_pages} pages, "

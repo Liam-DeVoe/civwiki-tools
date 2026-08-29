@@ -8,10 +8,8 @@ from mwparserfromhell.nodes import Comment, Heading, Template, Text
 from civlint.index import MAGIC_WORDS, normalize_title
 from civlint.types import Applicability, Edit, Finding, Fix, rule
 from civlint.wikitext import (
-    CATEGORY_RE,
     COMMENT_RE,
     REDIRECT_RE,
-    remove_span_and_line,
     transcluded_spans,
 )
 
@@ -50,9 +48,17 @@ def civ101(ctx):
     # page start counts as one virtual newline
     tail = 1
     known = True
+    # \n<!-- comment -->\n collapses to \n (validated via the parse API):
+    # a comment line flanked by newlines is stripped with one of them. A
+    # comment at the very start of the page is deleted without consuming
+    # a newline, so it gets no flag here.
+    comment_owns_line = False
     for offset, node in _top_level_spans(ctx):
         s = str(node)
         if isinstance(node, Comment):
+            line_start = ctx.text.rfind("\n", 0, offset) + 1
+            if line_start > 0 and not ctx.text[line_start:offset].strip():
+                comment_owns_line = True
             continue
         if isinstance(node, Template):
             info = _template_expansion(ctx.index, normalize_title(str(node.name)))
@@ -60,14 +66,21 @@ def civ101(ctx):
                 tail, known = 0, False
             elif not info[0]:  # empty expansions pass the tail through
                 tail, known = info[1], True
+            comment_owns_line = False
             continue
         if not isinstance(node, Text):
             break
         ws = len(s) - len(s.lstrip())
         gap = s[:ws] if ws < len(s) else s
-        n = gap.count("\n")
+        consumed = 0
+        if comment_owns_line:
+            first_nl = gap.find("\n")
+            if first_nl != -1 and not gap[:first_nl].strip():
+                consumed = 1  # this newline dies with the comment's line
+        comment_owns_line = False
+        n = gap.count("\n") - consumed
         after_gap = ctx.text[offset + len(gap):].strip()
-        if n and after_gap and not ctx.is_shielded(offset, offset + len(gap)):
+        if n > 0 and after_gap and not ctx.is_shielded(offset, offset + len(gap)):
             visible = tail + n >= 3
             if visible and not known:
                 # unknown template: only flag what renders regardless of it
@@ -81,7 +94,13 @@ def civ101(ctx):
                     start=offset,
                     end=offset + len(gap),
                     fix=Fix(
-                        edits=[Edit(offset, offset + len(gap), "\n" * keep)],
+                        edits=[
+                            Edit(
+                                offset,
+                                offset + len(gap),
+                                "\n" * (keep + consumed),
+                            )
+                        ],
                         applicability=Applicability.SAFE,
                     )
                     if tail + keep < 3
@@ -177,59 +196,11 @@ def civ103(ctx):
             )
 
 
-def _ancestor_categories(index, category: str, depth: int = 3) -> set[str]:
-    """Categories reachable upward from `category` within `depth` steps."""
-    seen = {category}
-    frontier = {category}
-    out: set[str] = set()
-    for _ in range(depth):
-        frontier = {
-            p for c in frontier for p in index.parent_categories(c)
-        } - seen
-        out |= frontier
-        seen |= frontier
-    return out
-
-
-@rule("CW120", "redundant parent category", requires_index=True)
-def civ120(ctx):
-    """The page is in both a category and one of that category's ancestor
-    categories (up to three levels up); membership in the ancestor is
-    redundant. The fix (unsafe: some parent categories intentionally hold
-    pages directly) removes the ancestor's category tag.
-    """
-    links = [(normalize_title(m["name"]), m) for m in ctx.finditer(CATEGORY_RE)]
-    if len(links) < 2:
-        return
-    ancestors = {name: _ancestor_categories(ctx.index, name) for name, _ in links}
-    for name, m in links:
-        child = next(
-            (
-                other
-                for other in sorted(ancestors)
-                if other != name
-                and name in ancestors[other]
-                # mutual ancestry means a category cycle; firing on both
-                # would strip the page's categorization entirely
-                and other not in ancestors[name]
-            ),
-            None,
-        )
-        if child is None:
-            continue
-        s, e = m.span()
-        del_start, del_end = remove_span_and_line(ctx.text, s, e)
-        yield Finding(
-            code="CW120",
-            message=f"category '{name}' is redundant: the page is already in"
-            f" its subcategory '{child}'",
-            start=s,
-            end=e,
-            fix=Fix(
-                edits=[Edit(del_start, del_end, "")],
-                applicability=Applicability.UNSAFE,
-            ),
-        )
+# There is deliberately no "redundant parent category" rule: categories can
+# be diffusing (members belong only in the most specific subcategory) or
+# non-diffusing (a master list that holds every member directly, e.g.
+# Category:People with 364 direct members), and wikitext can't tell them
+# apart — removing "redundant" parents would gut the master lists.
 
 
 @rule("CW121", "double redirect", requires_index=True)
@@ -390,7 +361,9 @@ def cw132(ctx):
     Two shapes get a fix, both unsafe since they change what the template
     receives: an argument whose text is one of the template's parameter
     names, followed by another unnamed argument, gains the missing `=`; and
-    an empty argument (a stray `||`) is deleted. Anything else is
+    an empty argument (a stray `||`) loses its pipe — just the pipe, so any
+    whitespace stays behind to keep the line layout and to keep a
+    value-final `}` from gluing onto the closing `}}`. Anything else is
     report-only.
     """
     for s, _, tpl in ctx.node_spans(ctx.wikicode.filter_templates()):
@@ -462,9 +435,23 @@ def cw132(ctx):
                     " positional parameters"
                 )
             else:
-                fix = Fix(
-                    edits=[Edit(ps - 1, pe, "")],
-                    applicability=Applicability.UNSAFE,
+                # delete only the pipe: the argument's whitespace joins the
+                # previous (trimmed) value, keeping the line layout and
+                # keeping brace runs apart. With no whitespace at all,
+                # gluing a value-final `}` onto the closing `}}` would
+                # change where the preprocessor closes the template — skip.
+                glues_braces = (
+                    pe == ps
+                    and ctx.text[ps - 2] in "{}"
+                    and ctx.text[pe : pe + 1] in "{}"
+                )
+                fix = (
+                    None
+                    if glues_braces
+                    else Fix(
+                        edits=[Edit(ps - 1, ps, "")],
+                        applicability=Applicability.UNSAFE,
+                    )
                 )
                 message = f"empty argument to '{name}' (stray '|')"
             yield Finding(

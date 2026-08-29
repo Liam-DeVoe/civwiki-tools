@@ -1,3 +1,4 @@
-Balanced [[a]] link.
-<nowiki>]]</nowiki>
-[[b|c]] fine.
+[[File:X.png|thumb|caption line
+
+second paragraph of caption]]
+But a stray close ]] fires.

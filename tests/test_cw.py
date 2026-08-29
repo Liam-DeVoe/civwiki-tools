@@ -1,4 +1,4 @@
-"""Tests for the index-dependent CW rules (CW101, CW103, CW120, CW121, CW132)."""
+"""Tests for the index-dependent CW rules (CW101, CW103, CW121, CW132)."""
 
 from civlint import engine, fixer
 from civlint.context import PageContext
@@ -70,67 +70,6 @@ def test_civ103_redirect_loop_is_a_redlink():
 def test_civ103_shielded_skipped():
     text = "<nowiki>[[Missing Page]]</nowiki> <!-- [[Missing Page]] -->"
     assert _lint("P", text, LINK_INDEX, "CW103") == []
-
-
-# --- CW120: redundant parent category ---
-
-CAT_INDEX = SiteIndex.from_pages(
-    {
-        "Category:Geography": "top-level",
-        "Category:Settlements": "[[Category:Geography]]",
-        "Category:Cities": "[[Category:Settlements]]",
-        # C1 in C2 in C3 in C4 in C5: C4 is 3 levels above C1, C5 is 4
-        "Category:C1": "[[Category:C2]]",
-        "Category:C2": "[[Category:C3]]",
-        "Category:C3": "[[Category:C4]]",
-        "Category:C4": "[[Category:C5]]",
-        "Category:C5": "x",
-        "Category:CycA": "[[Category:CycB]]",
-        "Category:CycB": "[[Category:CycA]]",
-    }
-)
-
-
-def test_civ120_direct_parent():
-    text = "Body.\n[[Category:Cities]]\n[[Category:Settlements]]\n"
-    findings = _lint("P", text, CAT_INDEX, "CW120")
-    assert [f.message for f in findings] == [
-        "category 'Settlements' is redundant:"
-        " the page is already in its subcategory 'Cities'"
-    ]
-
-
-def test_civ120_transitive_parent():
-    text = "Body.\n[[Category:Geography]]\n[[Category:Cities]]\n"
-    findings = _lint("P", text, CAT_INDEX, "CW120")
-    assert len(findings) == 1
-    assert "'Geography'" in findings[0].message
-
-
-def test_civ120_depth_limit():
-    fires = _lint("P", "[[Category:C1]] [[Category:C4]]", CAT_INDEX, "CW120")
-    assert len(fires) == 1  # 3 levels up: within reach
-    quiet = _lint("P", "[[Category:C1]] [[Category:C5]]", CAT_INDEX, "CW120")
-    assert quiet == []  # 4 levels up: out of reach
-
-
-def test_civ120_category_cycle_terminates_quietly():
-    text = "[[Category:CycA]]\n[[Category:CycB]]\n"
-    assert _lint("P", text, CAT_INDEX, "CW120") == []
-
-
-def test_civ120_unrelated_categories():
-    text = "[[Category:Geography]]\n[[Category:C1]]\n"
-    assert _lint("P", text, CAT_INDEX, "CW120") == []
-
-
-def test_civ120_fix_removes_line():
-    text = "Body.\n\n[[Category:Settlements]]\n[[Category:Cities]]\n"
-    fixed, applied, _ = fixer.apply_fixes(
-        text, lambda t: _lint("P", t, CAT_INDEX, "CW120"), unsafe=True
-    )
-    assert fixed == "Body.\n\n[[Category:Cities]]\n"
-    assert applied == {"CW120": 1}
 
 
 # --- CW121: double redirects ---
@@ -253,6 +192,31 @@ def test_civ101_trailing_whitespace_only_ok():
     assert _lint("P", "{{Infobox civilization|name=T}}\n\n", CW101_INDEX, "CW101") == []
 
 
+# comment semantics (validated via the parse API): \n<!-- c -->\n collapses
+# to \n, but a comment at the very start of the page is deleted without
+# consuming a newline
+
+
+def test_civ101_comment_only_lines_at_top_ok():
+    text = "<!-- a -->\n<!-- b -->\nBody text.\n"
+    assert _lint("P", text, CW101_INDEX, "CW101") == []
+
+
+def test_civ101_page_start_comment_then_blank_fires():
+    text = "<!-- a -->\n\nBody text.\n"
+    assert len(_lint("P", text, CW101_INDEX, "CW101")) == 1
+    assert _cw101_fix(text) == "<!-- a -->\nBody text.\n"
+
+
+def test_civ101_comment_line_swallows_one_newline():
+    # expands to </table>\n + \n + (comment line collapses \n\n to \n):
+    # three newlines render, but no single-gap edit can fix it
+    text = "{{Infobox civilization|name=T}}\n<!-- note -->\n\nBody.\n"
+    findings = _lint("P", text, CW101_INDEX, "CW101")
+    assert len(findings) == 1
+    assert findings[0].fix is None
+
+
 # --- CW132: unnamed argument to a template with no positional parameters ---
 
 CW132_INDEX = SiteIndex.from_pages(
@@ -293,6 +257,30 @@ def test_cw132_stray_double_pipe_fix():
     fixed, applied = _cw132_fix("{{Infobox paper|name=X||motto=Y}}")
     assert fixed == "{{Infobox paper|name=X|motto=Y}}"
     assert applied == {"CW132": 1}
+
+
+def test_cw132_stray_pipe_keeps_line_layout():
+    # only the pipe is deleted; the newline stays so lines don't join
+    fixed, _ = _cw132_fix("{{Infobox paper|name=X|\n|motto=Y\n}}")
+    assert fixed == "{{Infobox paper|name=X\n|motto=Y\n}}"
+
+
+def test_cw132_stray_pipe_before_closing_braces():
+    # a value ending in `}` stays separated from the closing `}}` by the
+    # argument's newline, so the deletion is offered and harmless
+    fixed, _ = _cw132_fix("{{Infobox paper|name={x}|\n}}")
+    assert fixed == "{{Infobox paper|name={x}\n}}"
+
+
+def test_cw132_brace_glue_blocks_fix():
+    # with no whitespace, deleting the pipe would glue `}` onto `}}` and
+    # move the preprocessor's closing point; report-only
+    text = "{{Infobox paper|name={x}|}}"
+    findings = _lint("P", text, CW132_INDEX, "CW132")
+    assert len(findings) == 1
+    assert findings[0].fix is None
+    fixed, applied = _cw132_fix(text)
+    assert fixed == text and not applied
 
 
 def test_cw132_generic_unnamed_is_report_only():

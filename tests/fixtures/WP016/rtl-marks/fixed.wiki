@@ -1,0 +1,2 @@
+A mark in latin text is removed.
+A mark inside 𐤔‎𐤀 rtl script is kept.

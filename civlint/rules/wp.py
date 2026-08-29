@@ -8,6 +8,7 @@ from civlint.wikitext import (
     CATEGORY_RE,
     FILE_PREFIX_RE,
     HEADING_RE,
+    overlaps,
     remove_span_and_line,
     split_top_level,
 )
@@ -26,9 +27,19 @@ def _in_ext_link(text, pos):
 
 
 def _link_balance(ctx):
-    """Unmatched [[ and ]] positions, resetting at each blank line."""
+    """Unmatched [[ and ]] positions, resetting at each blank line.
+
+    Tokens inside links the parser recognizes are skipped: a file link
+    may legally span lines (even blank ones) in its caption, so neither
+    its brackets nor its blank lines may disturb the balance.
+    """
+    parsed = [
+        (s, e) for s, e, _ in ctx.node_spans(ctx.wikicode.filter_wikilinks())
+    ]
     opens, closes, stack = [], [], []
     for m in ctx.finditer(r"\[\[|\]\]|\n[ \t]*\n"):
+        if overlaps(parsed, m.start(), m.end()):
+            continue
         tok = m.group()
         if tok == "[[":
             stack.append(m.start())
@@ -169,17 +180,33 @@ _INVIS = {
 }
 
 
+def _near_rtl_text(text: str, pos: int, window: int = 10) -> bool:
+    import unicodedata
+
+    # the marks themselves are bidi class R/L; only real letters count
+    return any(
+        c not in _INVIS and unicodedata.bidirectional(c) in ("R", "AL")
+        for c in text[max(0, pos - window) : pos + window]
+    )
+
+
 @rule("WP016", "invisible unicode character")
 def cw016(ctx):
     """Invisible or control characters (BOM, zero-width space, directional
-    marks, soft hyphen). Removed."""
+    marks, soft hyphen). Removed — except a directional mark near genuine
+    right-to-left script, which may be deliberate bidi control whose
+    removal reorders the displayed glyphs; those are report-only."""
     for m in ctx.finditer("[" + "".join(_INVIS) + "]"):
+        directional = m.group() in "‎‏"
+        fix = None
+        if not (directional and _near_rtl_text(ctx.text, m.start())):
+            fix = Fix([Edit(m.start(), m.end(), "")], Applicability.SAFE)
         yield Finding(
             code="WP016",
             message=f"invisible character {_INVIS[m.group()]}",
             start=m.start(),
             end=m.end(),
-            fix=Fix([Edit(m.start(), m.end(), "")], Applicability.SAFE),
+            fix=fix,
         )
 
 
@@ -504,9 +531,12 @@ def cw092(ctx):
 def cw113(ctx):
     """A newline inside a wikilink's target or label, like [[foo\\nbar]].
     Replaced with a space. Unsafe because the intended text may have been
-    two separate things."""
+    two separate things. File links are exempt: multi-line captions are
+    legal (and may hold line-sensitive markup like tables)."""
     for m in ctx.finditer(r"\[\[[^\[\]]*\]\]"):
         if "\n" not in m.group(0):
+            continue
+        if FILE_PREFIX_RE.match(m.group(0)[2:]):
             continue
         edits = [
             Edit(m.start() + q.start(), m.start() + q.end(), " ")
