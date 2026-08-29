@@ -130,7 +130,7 @@ def cmd_check(args) -> int:
                 # `text` may come from a stale index snapshot; saving text
                 # derived from it would silently revert newer wiki edits.
                 # Re-apply the fixes to the live text instead.
-                live = page.get()
+                live = page.get(get_redirect=True)
                 if live != text:
                     fixed_live, applied, _ = fixer.apply_fixes(
                         live, lint_text, unsafe=args.unsafe_fixes
