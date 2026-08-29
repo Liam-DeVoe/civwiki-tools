@@ -9,3 +9,7 @@
 ==also masked
 |}
 Normal text.
+== Heading with multi-line ref<ref name=":0">[[File:X.png|100px]]
+</ref> ==
+== Self-closed ref<ref name=":0" /> ==
+Text.

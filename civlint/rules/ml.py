@@ -110,14 +110,14 @@ _SELF_CLOSED_RE = re.compile(r"<([A-Za-z][\w-]*)((?:\s[^<>]*?)?)\s*/\s*>")
 def ml002(ctx):
     """Self-closed non-void HTML tag, e.g. <span/> or <div style=... />.
 
-    Mediawiki treats these as unclosed open tags. The fix rewrites
-    <tag ... /> to <tag ...></tag> (unsafe: the author may have meant an
-    open tag whose implicit close changed the layout). Void tags (<br/>)
-    and extension tags (<ref/>, <references/>) are legitimately
+    Mediawiki treats these as unclosed open tags. No fix: the author may
+    have meant an open-and-close pair (<tag></tag>) or a closing tag
+    (</tag>), and the two render differently. Void tags (<br/>) and
+    extension tags (<ref/>, <references/>) are legitimately
     self-closable and do not fire.
     """
     for m in ctx.finditer(_SELF_CLOSED_RE):
-        tag, attrs = m.group(1), m.group(2).rstrip()
+        tag = m.group(1)
         if tag.lower() not in _HTML_NONVOID:
             continue
         yield Finding(
@@ -125,10 +125,6 @@ def ml002(ctx):
             message=f"self-closed non-void HTML tag <{tag}/>",
             start=m.start(),
             end=m.end(),
-            fix=Fix(
-                edits=[Edit(m.start(), m.end(), f"<{tag}{attrs}></{tag}>")],
-                applicability=Applicability.UNSAFE,
-            ),
         )
 
 

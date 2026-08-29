@@ -369,3 +369,105 @@ def cw131(ctx):
             end=e,
             fix=fix,
         )
+
+
+@rule(
+    "CW132",
+    "unnamed argument to a template with no positional parameters",
+    requires_index=True,
+)
+def cw132(ctx):
+    """An unnamed argument passed to a template whose source never reads
+    positional parameters ({{{1}}} and so on), so the template silently
+    ignores it. The usual cause is a pipe typed where an `=` was meant, as
+    in `|alt|Some caption` for `|alt=Some caption`.
+
+    Parameter names come from the template's transcluded source in the site
+    index. Templates whose parameters can't be enumerated are skipped
+    entirely: missing pages, Lua-backed templates (#invoke reads arguments
+    the wikitext never mentions), and computed {{{...}}} names.
+
+    Two shapes get a fix, both unsafe since they change what the template
+    receives: an argument whose text is one of the template's parameter
+    names, followed by another unnamed argument, gains the missing `=`; and
+    an empty argument (a stray `||`) is deleted. Anything else is
+    report-only.
+    """
+    for s, _, tpl in ctx.node_spans(ctx.wikicode.filter_templates()):
+        if ctx.is_shielded(s):
+            continue
+        if all(p.showkey for p in tpl.params):
+            continue
+        name = str(tpl.name).strip()
+        if name.startswith((":", "#", "{")):
+            continue
+        if name.partition(":")[0].upper() in MAGIC_WORDS:
+            continue
+        declared = ctx.index.template_params(name)
+        if declared is None or any(d.isdigit() for d in declared):
+            continue
+        named_keys = {str(p.name).strip() for p in tpl.params if p.showkey}
+        # str(tpl) reproduces the source exactly, so parameter offsets
+        # follow arithmetically: {{, name, then "|" + param, repeated
+        spans = []
+        pos = s + 2 + len(str(tpl.name))
+        for p in tpl.params:
+            spans.append((pos + 1, pos + 1 + len(str(p))))
+            pos = spans[-1][1]
+        i = 0
+        while i < len(tpl.params):
+            p = tpl.params[i]
+            ps, pe = spans[i]
+            if p.showkey:
+                i += 1
+                continue
+            value = str(p).strip()
+            nxt = tpl.params[i + 1] if i + 1 < len(tpl.params) else None
+            if (
+                value in declared
+                and value not in named_keys
+                and nxt is not None
+                and not nxt.showkey
+                # a following argument that is itself a parameter name is a
+                # run of bare names, not a name|value pair to merge
+                and str(nxt).strip() not in declared
+            ):
+                yield Finding(
+                    code="CW132",
+                    message=f"unnamed argument '{value}'; likely a missing"
+                    f" '=' ('{name}' has a '{value}' parameter)",
+                    start=ps - 1,
+                    end=spans[i + 1][1],
+                    fix=Fix(
+                        # trailing whitespace of the argument, the pipe, and
+                        # the next argument's leading whitespace become "="
+                        edits=[
+                            Edit(
+                                ps + len(str(p).rstrip()),
+                                spans[i + 1][0]
+                                + len(str(nxt))
+                                - len(str(nxt).lstrip()),
+                                "=",
+                            )
+                        ],
+                        applicability=Applicability.UNSAFE,
+                    ),
+                )
+                i += 2
+                continue
+            if value:
+                fix = None
+                message = (
+                    f"unnamed argument to '{name}', which has no"
+                    " positional parameters"
+                )
+            else:
+                fix = Fix(
+                    edits=[Edit(ps - 1, pe, "")],
+                    applicability=Applicability.UNSAFE,
+                )
+                message = f"empty argument to '{name}' (stray '|')"
+            yield Finding(
+                code="CW132", message=message, start=ps - 1, end=pe, fix=fix
+            )
+            i += 1

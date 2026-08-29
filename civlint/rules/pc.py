@@ -80,7 +80,6 @@ _PIPED_LINK_RE = re.compile(
 )
 # linktrail for an English wiki: characters that may follow ]] as part of
 # the rendered link word
-_LINKTRAIL_RE = re.compile(r"[a-z]+")
 
 
 @rule("PC002", "piped link where the pipe is unnecessary")
@@ -88,20 +87,15 @@ def pc002(ctx):
     """Ports cosmetic_changes.cleanUpLinks (pipe simplification part).
 
     [[Foo|foo]] -> [[foo]] when target and label differ only in
-    first-letter case, and [[Foo|Foos]] -> [[Foo]]s when the label is the
-    target plus a linktrail suffix. Links with fragments or namespace
-    prefixes are skipped.
+    first-letter case. Links with fragments or namespace prefixes are
+    skipped. Unlike upstream, [[Foo|Foos]] is NOT collapsed to [[Foo]]s:
+    the linktrail form renders the same but reads worse in the source.
     """
     for m in ctx.finditer(_PIPED_LINK_RE):
         title, label = m["title"], m["label"]
-        if _first_lower(title) == _first_lower(label):
-            new = f"[[{label}]]"
-        elif _first_lower(label).startswith(
-            _first_lower(title)
-        ) and _LINKTRAIL_RE.fullmatch(label[len(title) :]):
-            new = f"[[{label[: len(title)]}]]{label[len(title) :]}"
-        else:
+        if _first_lower(title) != _first_lower(label):
             continue
+        new = f"[[{label}]]"
         yield Finding(
             code="PC002",
             message=f"piped link can be simplified to {new}",

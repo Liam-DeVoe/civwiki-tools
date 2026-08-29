@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Iterator
 
 from civlint.anchors import page_anchors
-from civlint.wikitext import CATEGORY_RE, REDIRECT_RE
+from civlint.wikitext import CATEGORY_RE, REDIRECT_RE, transcluded_spans
 
 DEFAULT_PATH = Path(__file__).parent.parent / "cache" / "index.db"
 
@@ -111,6 +111,7 @@ class SiteIndex:
         if not Path(path).exists():
             raise FileNotFoundError(missing_index_message(path))
         self.db = sqlite3.connect(path)
+        self._template_params_cache: dict[str, frozenset[str] | None] = {}
 
     @classmethod
     def from_pages(
@@ -126,6 +127,7 @@ class SiteIndex:
         """
         ix = cls.__new__(cls)
         ix.db = sqlite3.connect(":memory:")
+        ix._template_params_cache = {}
         ix.db.executescript(_SCHEMA)
         for title, text in pages.items():
             prefix = normalize_title(title).partition(":")[0]
@@ -137,6 +139,42 @@ class SiteIndex:
                 (normalize_title(name), int(empty), tail),
             )
         return ix
+
+    def template_params(self, name: str) -> frozenset[str] | None:
+        """Parameter names the template's transcluded source reads, following
+        redirects. None when they can't be enumerated: the template is
+        missing from the index, uses Lua (#invoke reads arguments the
+        wikitext never mentions), or computes parameter names dynamically.
+        """
+        title = normalize_title(name)
+        if not title.startswith("Template:"):
+            title = f"Template:{title}"
+        if title not in self._template_params_cache:
+            self._template_params_cache[title] = self._template_params(title)
+        return self._template_params_cache[title]
+
+    def _template_params(self, title: str) -> frozenset[str] | None:
+        import mwparserfromhell
+
+        target = self.resolve(title)
+        row = (
+            self._one("SELECT text FROM pages WHERE title = ?", target)
+            if target
+            else None
+        )
+        if row is None or row[0] is None:
+            return None
+        body = "".join(row[0][s:e] for s, e in transcluded_spans(row[0]))
+        # conservative: any #invoke (including {{safesubst:#invoke:...}}
+        # wrappers) means Lua reads arguments the wikitext never mentions
+        if "#invoke:" in body.lower():
+            return None
+        params = set()
+        for arg in mwparserfromhell.parse(body).filter_arguments():
+            if arg.name.filter_arguments() or arg.name.filter_templates():
+                return None  # computed name, e.g. {{{ {{{n}}} }}}
+            params.add(str(arg.name).strip())
+        return frozenset(params)
 
     def template_info(self, name: str) -> tuple[bool, int] | None:
         """(expands to nothing, trailing newlines) for a template, if known."""

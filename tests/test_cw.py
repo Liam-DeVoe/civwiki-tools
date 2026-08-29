@@ -1,4 +1,4 @@
-"""Tests for the index-dependent CW rules (CW103, CW120, CW121)."""
+"""Tests for the index-dependent CW rules (CW101, CW103, CW120, CW121, CW132)."""
 
 from civlint import engine, fixer
 from civlint.context import PageContext
@@ -251,3 +251,125 @@ def test_civ101_blank_lines_in_prose_ok():
 
 def test_civ101_trailing_whitespace_only_ok():
     assert _lint("P", "{{Infobox civilization|name=T}}\n\n", CW101_INDEX, "CW101") == []
+
+
+# --- CW132: unnamed argument to a template with no positional parameters ---
+
+CW132_INDEX = SiteIndex.from_pages(
+    {
+        # named-only: reads name/alt/motto; the {{{fake}}} in <noinclude>
+        # documentation must not count as a declared parameter
+        "Template:Infobox paper": (
+            "{{{name|}}} {{{alt|}}} {{{motto|}}}"
+            "<noinclude>doc says {{{fake}}}</noinclude>"
+        ),
+        "Template:Wrap": "{{{1}}} in {{{style|}}}",  # positional
+        "Template:Lua": "{{#invoke:Foo|bar}}",
+        "Template:Dynamic": "{{{ {{{which}}} |}}}",
+        "Template:Static": "no parameters at all",
+        "Template:IP": "#REDIRECT [[Template:Infobox paper]]",
+    }
+)
+
+
+def _cw132_fix(text):
+    fixed, applied, _ = fixer.apply_fixes(
+        text, lambda t: _lint("P", t, CW132_INDEX, "CW132"), unsafe=True
+    )
+    return fixed, applied
+
+
+def test_cw132_missing_equals_fix():
+    text = "{{Infobox paper|name=X|alt|Some caption|motto=Y}}"
+    findings = _lint("P", text, CW132_INDEX, "CW132")
+    assert len(findings) == 1
+    assert "missing '='" in findings[0].message
+    fixed, applied = _cw132_fix(text)
+    assert fixed == "{{Infobox paper|name=X|alt=Some caption|motto=Y}}"
+    assert applied == {"CW132": 1}
+
+
+def test_cw132_stray_double_pipe_fix():
+    fixed, applied = _cw132_fix("{{Infobox paper|name=X||motto=Y}}")
+    assert fixed == "{{Infobox paper|name=X|motto=Y}}"
+    assert applied == {"CW132": 1}
+
+
+def test_cw132_generic_unnamed_is_report_only():
+    findings = _lint("P", "{{Infobox paper|name=X|stray}}", CW132_INDEX, "CW132")
+    assert len(findings) == 1
+    assert findings[0].fix is None
+
+
+def test_cw132_noinclude_param_not_declared():
+    # "fake" only appears in the template's <noinclude> doc, so it doesn't
+    # qualify for the missing-= fix
+    findings = _lint("P", "{{Infobox paper|fake|x}}", CW132_INDEX, "CW132")
+    assert len(findings) == 2
+    assert all(f.fix is None for f in findings)
+
+
+def test_cw132_bare_name_run_not_merged():
+    # two declared names in a row is a run of bare names (values deleted or
+    # never filled in), not a name|value pair
+    findings = _lint("P", "{{Infobox paper|alt|motto|name=X}}", CW132_INDEX, "CW132")
+    assert len(findings) == 2
+    assert all(f.fix is None for f in findings)
+
+
+def test_cw132_existing_named_key_blocks_merge():
+    # merging would create a duplicate alt=; report only
+    findings = _lint(
+        "P", "{{Infobox paper|alt=A|alt|caption}}", CW132_INDEX, "CW132"
+    )
+    assert len(findings) == 2
+    assert all(f.fix is None for f in findings)
+
+
+def test_cw132_positional_template_skipped():
+    assert _lint("P", "{{Wrap|text|style=big}}", CW132_INDEX, "CW132") == []
+
+
+def test_cw132_lua_template_skipped():
+    assert _lint("P", "{{Lua|anything}}", CW132_INDEX, "CW132") == []
+
+
+def test_cw132_dynamic_params_skipped():
+    assert _lint("P", "{{Dynamic|x|which=1}}", CW132_INDEX, "CW132") == []
+
+
+def test_cw132_unknown_template_skipped():
+    assert _lint("P", "{{Mystery|arg}}", CW132_INDEX, "CW132") == []
+
+
+def test_cw132_no_params_template_fires():
+    findings = _lint("P", "{{Static|stray}}", CW132_INDEX, "CW132")
+    assert len(findings) == 1
+    assert findings[0].fix is None
+
+
+def test_cw132_redirect_followed():
+    fixed, _ = _cw132_fix("{{IP|name=X|alt|caption}}")
+    assert fixed == "{{IP|name=X|alt=caption}}"
+
+
+def test_cw132_named_only_call_ok():
+    text = "{{Infobox paper|name=X|alt=Y|motto=Z}}"
+    assert _lint("P", text, CW132_INDEX, "CW132") == []
+
+
+def test_cw132_nested_template_checked():
+    text = "{{Infobox paper|name={{Static|stray}}}}"
+    findings = _lint("P", text, CW132_INDEX, "CW132")
+    assert len(findings) == 1
+
+
+def test_cw132_multiline_call():
+    text = "{{Infobox paper\n|name=X\n|alt\n|Some caption\n|motto=Y\n}}"
+    fixed, _ = _cw132_fix(text)
+    assert fixed == "{{Infobox paper\n|name=X\n|alt=Some caption\n|motto=Y\n}}"
+
+
+def test_cw132_shielded_skipped():
+    text = "<nowiki>{{Infobox paper|alt|x}}</nowiki>"
+    assert _lint("P", text, CW132_INDEX, "CW132") == []

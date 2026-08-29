@@ -84,19 +84,40 @@ def cw002(ctx):
 
 
 _H_OPEN = re.compile(r"^(={2,6})([^=\n][^\n]*?)[ \t]*$", re.M)
+# extension tags are replaced by one-line strip markers before heading
+# parsing, so a heading may span lines through one (e.g. a multi-line <ref>)
+_EXT_TAG_OPEN = re.compile(
+    r"<(ref|references|nowiki|pre|syntaxhighlight|source|gallery|math"
+    r"|score|poem|timeline|templatedata)\b([^<>]*?)(/\s*)?>",
+    re.I,
+)
+
+
+def _has_unclosed_ext_tag(line: str) -> bool:
+    for m in _EXT_TAG_OPEN.finditer(line):
+        if m.group(3):  # self-closing, e.g. <ref name=x />
+            continue
+        if f"</{m.group(1).lower()}" not in line[m.end() :].lower():
+            return True
+    return False
 
 
 @rule("WP008", "heading missing closing = run")
 def cw008(ctx):
     """A line starting with 2-6 = signs and title text but no closing =
     run, e.g. `== Title`. Lines inside templates or tables are skipped,
-    since = there is usually parameter syntax, not a heading."""
+    since = there is usually parameter syntax, not a heading. Lines with
+    an extension tag that opens but does not close on the line (a
+    multi-line <ref> in a heading) are skipped: the tag becomes a
+    one-line strip marker, so the heading closes on a later line."""
     masked = ctx.mask_spans
     for m in ctx.finditer(_H_OPEN):
         title = m.group(2)
         if not title.strip() or title.rstrip().endswith("="):
             continue
         if any(s <= m.start() < e for s, e in masked):
+            continue
+        if _has_unclosed_ext_tag(m.group(0)):
             continue
         yield Finding(
             code="WP008",
