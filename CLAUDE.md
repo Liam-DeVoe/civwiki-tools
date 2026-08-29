@@ -71,23 +71,31 @@ python3 scripts/regex_edit_backlinks.py
 
 ## Important Implementation Details
 
-### Making Wiki Edits
+### Interacting with CivWiki
 
 ```python
 from civwiki_tools import site  # importing triggers login
+import pywikibot
 
+# reading a page
+page = site.page("Some Page")
+print(page.text)
+
+# editing a page
 page = site.page("Some Page")
 page.text = new_text
 page.save(summary="claude: replace dead links")
+
+# categories
+category = pywikibot.Category(site, "Category:CivMC")
+members = category.members()
+categories = site.page("Some Page").categories()
+
+pages = site.page("Some Page").backlinks() # pages linking to a page
+pages = site.search("some phrase", namespaces=[0]) # searching page text
+site.page("Some Page").exists() # checking whether a page exists
 ```
 
 - Prefix edit summaries with `claude: ` unless told otherwise.
 - Treat scripts you write as throwaway by default: run them and delete them, unless it's clear from context (or an explicit ask) that the script should be kept for reuse.
 - Beyond the custom `site.page()`, `site` is a normal pywikibot `APISite` — standard pywikibot usage works.
-
-### Wiki Template Generation
-
-- Templates follow format: `Template:FactoryModConfig_{factory}_({server})`
-- Server names are case-normalized (e.g., "civmc" → "CivMC")
-- Random recipe outputs get separate anchor-linked tables
-- Float formatting: strips unnecessary precision while avoiding scientific notation
