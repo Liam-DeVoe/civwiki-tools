@@ -1,0 +1,3 @@
+<tt>mono</tt> and <strike>gone</strike>.
+<font color="red">warning</font>
+<center>middle</center>

@@ -1,0 +1,8 @@
+* item one
+# numbered
+;term
+:indent
+*# nested ok
+** deep
+#REDIRECT [[Target]]
+* good

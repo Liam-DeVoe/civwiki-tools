@@ -1,0 +1,3 @@
+{{Good|a=b}}
+{{Broken template
+Text.

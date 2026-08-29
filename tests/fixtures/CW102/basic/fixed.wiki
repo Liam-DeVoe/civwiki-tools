@@ -1,0 +1,8 @@
+Intro.
+
+Text under empty heading.
+
+More text.
+
+== Real heading ==
+Content.

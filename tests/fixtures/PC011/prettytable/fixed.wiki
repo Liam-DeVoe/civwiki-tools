@@ -1,0 +1,6 @@
+{| class="wikitable sortable"
+| a
+|}
+{| class="wikitable"
+| b
+|}

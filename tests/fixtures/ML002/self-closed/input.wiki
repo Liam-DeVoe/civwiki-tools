@@ -1,0 +1,2 @@
+A <span style="color:red"/> and <div /> here.
+Bold <b/> and table cell <td/>.

@@ -1,0 +1,4 @@
+[[ category : Foo ]]
+[[Category:Bar|sort key]]
+[[category:Baz|Qux]]
+[[Category:Good]]

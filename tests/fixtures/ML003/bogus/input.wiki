@@ -1,0 +1,2 @@
+[[File:Foo.png|thumb|blah|A caption]]
+[[File:Bar.png|200px|framee|left|another caption]]

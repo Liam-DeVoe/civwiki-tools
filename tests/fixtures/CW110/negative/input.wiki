@@ -1,0 +1,3 @@
+Use <nowiki>~~~~</nowiki> to sign talk posts.
+<!-- reminder: ~~~~ -->
+Two tildes ~~ are harmless.

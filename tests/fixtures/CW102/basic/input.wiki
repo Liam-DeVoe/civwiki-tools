@@ -1,0 +1,10 @@
+Intro.
+
+== ==
+Text under empty heading.
+
+==  <!--todo--> ==
+More text.
+
+== Real heading ==
+Content.

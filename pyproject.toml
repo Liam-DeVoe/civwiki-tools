@@ -5,9 +5,17 @@ dependencies = [
     "pywikibot",
     "pyyaml",
     "beautifulsoup4",
-    "lxml"
+    "lxml",
+    "mwparserfromhell"
 ]
+
+[project.scripts]
+civlint = "civlint.cli:main"
 
 # see "tip" in https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#setuptools-specific-configuration
 [tool.setuptools]
-packages = ["civwiki_tools"]
+packages = ["civwiki_tools", "civlint", "civlint.rules"]
+
+[tool.setuptools.package-data]
+civlint = ["data/*.tsv"]
+

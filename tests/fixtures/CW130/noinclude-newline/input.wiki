@@ -1,0 +1,7 @@
+{{Infobox test
+| name = {{{name|}}}
+}}
+<noinclude>
+docs here
+[[Category:Templates]]
+</noinclude>

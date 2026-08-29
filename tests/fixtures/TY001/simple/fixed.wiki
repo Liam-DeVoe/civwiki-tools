@@ -1,0 +1,3 @@
+The city was founded in 2021.
+
+Players receive items at spawn.

@@ -8,3 +8,5 @@ user-config.py
 config.py
 input.txt
 .claude
+cache/
+.pytest_cache

@@ -1,0 +1,6 @@
+{{Infobox town
+|name = {{c|Foo|bold}}
+|server = [[CivMC|the server]]
+|founded = June 2022
+|mayor = Bob
+}}

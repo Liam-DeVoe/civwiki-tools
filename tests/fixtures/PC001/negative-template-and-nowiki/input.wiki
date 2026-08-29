@@ -1,0 +1,6 @@
+{{Infobox
+| cat = [[Category:Hidden]]
+}}
+Body text after template.
+<nowiki>[[Category:Nope]]</nowiki>
+More text.

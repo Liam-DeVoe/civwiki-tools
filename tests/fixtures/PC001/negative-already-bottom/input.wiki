@@ -1,0 +1,4 @@
+Body text.
+
+[[Category:A]]
+[[Category:B]]

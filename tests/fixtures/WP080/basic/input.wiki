@@ -1,0 +1,3 @@
+[http://example.com/foo some
+label]
+Fine [https://example.com link].

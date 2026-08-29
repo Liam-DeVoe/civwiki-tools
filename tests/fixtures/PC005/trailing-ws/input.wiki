@@ -1,0 +1,10 @@
+Some text.   
+{|
+| cell   
+|}
+ preformatted   
+Normal.	
+{{Tmpl
+|param = value  
+}}
+End.

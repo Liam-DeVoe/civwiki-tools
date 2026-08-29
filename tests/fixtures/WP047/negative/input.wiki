@@ -1,0 +1,2 @@
+{{a}} and {{b|c={{d}}}} balanced.
+<nowiki>}}</nowiki>

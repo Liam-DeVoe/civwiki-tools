@@ -1,0 +1,3 @@
+Zerowidth space.
+Softhyphen and BOM.
+Normal line.

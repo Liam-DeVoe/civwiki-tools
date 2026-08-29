@@ -1,0 +1,3 @@
+Teh city was founded in 2021.
+
+Players recieve items at spawn.

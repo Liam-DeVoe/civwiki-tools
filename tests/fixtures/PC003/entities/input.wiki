@@ -1,0 +1,2 @@
+A &#8211; dash and &eacute; and &#x2014; here.
+Keep &amp; and &nbsp; and &#91; and &lt; and &#039;.

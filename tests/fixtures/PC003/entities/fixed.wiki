@@ -1,0 +1,2 @@
+A – dash and é and — here.
+Keep &amp; and &nbsp; and &#91; and &lt; and &#039;.

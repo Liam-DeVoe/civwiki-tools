@@ -1,0 +1,6 @@
+This is '''bold''' and ''italic'' text.
+Also '''strong''' and ''em''.
+----
+== My Heading ==
+Regular <hr class="x" /> line.
+<b>unclosed stays

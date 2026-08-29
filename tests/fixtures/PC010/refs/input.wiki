@@ -1,0 +1,5 @@
+Text.<ref name ="a">Content</ref>
+Empty.<ref></ref>
+Self.<ref/>
+Named empty.<ref name="b"></ref>
+Good.<ref name="c" />

@@ -1,0 +1,7 @@
+== Parent ==
+
+=== Child ===
+Real content.
+
+== Other ==
+Text.

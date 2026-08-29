@@ -1,0 +1,6 @@
+This is <b>bold</b> and <i>italic</i> text.
+Also <strong>strong</strong> and <em>em</em>.
+<hr>
+ <h2> My Heading </h2> 
+Regular <hr class="x"> line.
+<b>unclosed stays

@@ -1,0 +1,5 @@
+Text<br> and <br> here.
+A valid <br> and <br /> stay.
+<br>
+Weird <br> and <br> and <br>.
+<nowiki></br></nowiki>

@@ -1,0 +1,4 @@
+Some text.
+[[Category:A]]
+[[Category:B]]
+[[Category:C]]

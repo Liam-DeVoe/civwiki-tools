@@ -1,0 +1,6 @@
+{{Infobox
+| name = Foo<br>
+| other = Bar
+}}
+{{T|a<br>}}
+{{T|a<br>}}

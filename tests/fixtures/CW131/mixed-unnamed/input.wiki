@@ -1,0 +1,1 @@
+{{Infobox town|Foo|name=A|server=B|founded=C|mayor=D}}

@@ -1,0 +1,7 @@
+{{tmpl|a=b}}
+{{a|{{b}}}}
+{|
+|-
+| cell
+|}
+<nowiki>{{</nowiki>

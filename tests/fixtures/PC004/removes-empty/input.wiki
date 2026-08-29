@@ -1,0 +1,9 @@
+Intro.
+
+== Empty ==
+
+== Kept ==
+Content here.
+
+== Also empty ==
+<!-- just a comment -->

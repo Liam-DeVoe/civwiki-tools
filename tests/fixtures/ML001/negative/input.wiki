@@ -1,0 +1,3 @@
+Some <code><font color="red">shielded</font></code> text.
+<!-- <center>comment</center> -->
+<nowiki><tt>x</tt></nowiki>

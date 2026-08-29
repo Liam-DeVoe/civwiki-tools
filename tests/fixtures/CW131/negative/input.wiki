@@ -1,0 +1,12 @@
+Inline use {{Infobox town|name=A|server=B|founded=C|mayor=D}} in a sentence.
+{{Infobox town|name=A|server=B|founded=C}}
+{{Coord|1|2|3|4|5}}
+{{#if:x|a=1|b=2|c=3|d=4}}
+{{Infobox town
+|name=A
+|server=B
+|founded=C
+|mayor=D
+}}
+{{Infobox town|name=A|server=B|founded=C|mayor=D}} trailing text
+<pre>{{Infobox town|name=A|server=B|founded=C|mayor=D}}</pre>

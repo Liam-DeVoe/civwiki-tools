@@ -1,0 +1,8 @@
+Intro text.
+
+More body text after the category.
+
+Final line.
+
+[[Category:Servers]]
+[[Category:CivMC|sort]]

@@ -1,0 +1,6 @@
+See [[http://example.com/page some label]] here.
+And [[https://example.com/page]] too.
+Pipe [http://example.com/a |label] form.
+Ext [http://example.com/doc.pdf|My Doc] form.
+Bare [http://example.com] is fine.
+Nopipe [http://example.com/b|label] stays.

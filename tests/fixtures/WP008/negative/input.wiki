@@ -1,0 +1,11 @@
+== Good ==
+{{Infobox
+| a = b
+== not a heading
+}}
+{|
+|-
+| cell
+==also masked
+|}
+Normal text.

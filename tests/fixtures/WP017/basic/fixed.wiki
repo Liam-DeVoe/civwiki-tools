@@ -1,0 +1,2 @@
+Text with [[Category:Bar|sort]] inline dup below.
+[[Category:Foo]]

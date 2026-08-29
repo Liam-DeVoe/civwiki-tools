@@ -1,0 +1,8 @@
+== Valid ==
+Text.
+
+<!--
+== ==
+-->
+<nowiki>== ==</nowiki>
+Prose with = and == signs.

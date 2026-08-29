@@ -1,0 +1,1 @@
+Retrieved {{{date}}}.  <noinclude>docs</noinclude>

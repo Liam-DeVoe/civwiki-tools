@@ -1,0 +1,2 @@
+[https://example.com see [[Main Page]] here] breaks.
+A normal [https://example.com link] and a [[wikilink]] are fine.

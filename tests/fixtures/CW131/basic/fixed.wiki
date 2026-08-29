@@ -1,0 +1,8 @@
+{{Infobox town
+|name=Foo
+|server=[[CivMC]]
+|founded=June 2022
+|mayor=Bob
+}}
+
+'''Foo''' is a town on [[CivMC]].

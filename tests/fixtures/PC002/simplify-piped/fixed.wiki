@@ -1,0 +1,3 @@
+See [[dog]] and [[Cat]] and [[Fox]]es here.
+But [[Help:Contents|contents]] and [[Dog#Anatomy|dog]] stay.
+Also [[Dog|puppy]] stays.

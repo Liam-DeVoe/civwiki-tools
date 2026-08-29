@@ -1,0 +1,6 @@
+Balanced [[a]] and [[b|c]] links.
+Nested [[File:X.png|see [[inner]] caption]].
+<nowiki>[[</nowiki>
+[http://example.com a [[ label]
+
+End.

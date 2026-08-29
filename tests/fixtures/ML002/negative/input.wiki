@@ -1,0 +1,3 @@
+Line break <br/> and <br /> and <hr/>.
+A reference <ref name=x /> and <references/>.
+Word break <wbr/> and a gallery <gallery/>.
