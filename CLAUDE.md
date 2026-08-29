@@ -15,28 +15,9 @@ This is a Python toolset for automating edits to civwiki.org, a MediaWiki instan
 ### Core Library (`civwiki_tools/`)
 
 - **`factorymod.py`**: Custom YAML parser for FactoryMod server configs
-  - Implements a dataclass-based `Model` system with automatic type coercion
-  - Parses recipes, factories, materials, and durations from game server configs
-  - Handles upgrade chains between factories (`upgrades_to`, `upgrades_from`)
-  - Special parsing logic for randomized recipe outputs
-
 - **`family.py`**: pywikibot Family definition for civwiki.org
-  - Registers civwiki.org as a pywikibot-compatible site
-  - Custom scriptpath: `/w`
-
 - **`site.py`**: Thin wrapper around pywikibot's APISite with convenience methods
-
-- **`utils.py`**:
-  - Initializes and registers the civwiki Family with pywikibot
-  - Exports a globally configured `site` object
-  - Provides `RESOURCES` path constant pointing to `resources/` directory
-  - `relog()` function to force token refresh after login failures
-
 - **`__init__.py`**: Entry point that handles authentication
-  - Reads bot credentials from `config.py` (password) and `user-config.py` (username)
-  - Performs ClientLoginManager authentication on import
-  - Forces userinfo/tokens refresh post-login due to pywikibot quirks
-  - Exports the authenticated `site` object for use in scripts
 
 ### Configuration Files
 
@@ -44,38 +25,14 @@ This is a Python toolset for automating edits to civwiki.org, a MediaWiki instan
 - **`config.py`**: Contains bot password (format: `password = "..."`)
 - Both have `.sample` versions showing required format
 
-### Resources (`resources/`)
-
-Contains FactoryMod YAML configuration files from different servers:
-- `civmc.yaml`
-- `civclassic 2.0.yaml`
-- `civcraft 3.0.yaml`
-
-These files define factory types, recipes, materials, production times, and upgrade paths used by the FactoryMod plugin.
-
 ### Scripts (`scripts/`)
 
 All scripts are standalone and meant to be run directly:
 
 - **`update_factorymod.py`**: Main script for syncing FactoryMod configs to wiki
-  - Parses YAML configs and generates MediaWiki template pages
-  - Creates tables for factory recipes, repair costs, upgrades, and random drops
-  - Handles item name mappings (e.g., "Log" → "Oak Log") for older configs
-  - Usage examples in file header
-
 - **`import_item_image.py`**: Fetches block/item images from minecraft.wiki
-  - Scrapes direct image URLs from minecraft.wiki File pages
-  - Uploads to civwiki with proper attribution
-  - Can accept explicit URL or auto-guess from item name
-
 - **`merge_civlization_categories.py`**: Consolidates server and civilization categories
-  - Replaces `[[Category:CivMC]] + [[Category:Civilizations]]` with `[[Category:Civilizations (CivMC)]]`
-  - Processes all pages in the Civilizations category
-
 - **`regex_edit_backlinks.py`**: Template for regex-based mass edits on pages linking to a target
-  - Finds all pages that link to a specified page
-  - Applies regex pattern replacement across those backlinks
-  - Shows diffs before saving
 
 ### Utility Files
 
@@ -118,18 +75,15 @@ python3 scripts/regex_edit_backlinks.py
 
 ## Important Implementation Details
 
+### Edit Summaries
+
+If Claude is told to use Tybot to make an edit to the wiki, prefix the edit summary with `claude: ` — e.g. `claude: replace dead links` - unless told otherwise.
+
 ### Pywikibot Integration
 
 - The library is not designed to be imported as a standard package. Importing `civwiki_tools` triggers authentication and login.
 - The `site` object in `civwiki_tools.utils` is the authenticated API interface used by all scripts.
 - `relog()` must be called if token-related errors occur (pywikibot's session management is fragile).
-
-### FactoryMod Parser Quirks
-
-- Uses `SPECIAL_PARSING_1` sentinel for fields requiring custom parsing logic (see `RecipeRandomOutput.quantities`)
-- The `Duration` class parses Minecraft time formats: `1d2h30m15s` (days, hours, minutes, seconds) and legacy `t` (ticks)
-- Default values: lists default to `[]`, others to `None`, unless class attribute specifies otherwise
-- Upgrade recipes link factories via `recipe.factory` attribute, which is resolved during parsing
 
 ### Wiki Template Generation
 
