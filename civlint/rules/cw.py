@@ -13,6 +13,7 @@ from civlint.wikitext import (
     transcluded_spans,
 )
 
+
 def _top_level_spans(ctx):
     """(offset, node) for each top-level node of ctx.wikicode."""
     offset = 0
@@ -79,7 +80,7 @@ def civ101(ctx):
                 consumed = 1  # this newline dies with the comment's line
         comment_owns_line = False
         n = gap.count("\n") - consumed
-        after_gap = ctx.text[offset + len(gap):].strip()
+        after_gap = ctx.text[offset + len(gap) :].strip()
         if n > 0 and after_gap and not ctx.is_shielded(offset, offset + len(gap)):
             visible = tail + n >= 3
             if visible and not known:
@@ -93,18 +94,20 @@ def civ101(ctx):
                     " an empty paragraph",
                     start=offset,
                     end=offset + len(gap),
-                    fix=Fix(
-                        edits=[
-                            Edit(
-                                offset,
-                                offset + len(gap),
-                                "\n" * (keep + consumed),
-                            )
-                        ],
-                        applicability=Applicability.SAFE,
-                    )
-                    if tail + keep < 3
-                    else None,
+                    fix=(
+                        Fix(
+                            edits=[
+                                Edit(
+                                    offset,
+                                    offset + len(gap),
+                                    "\n" * (keep + consumed),
+                                )
+                            ],
+                            applicability=Applicability.SAFE,
+                        )
+                        if tail + keep < 3
+                        else None
+                    ),
                 )
         if ws < len(s):
             break  # body content starts inside this text node
@@ -159,11 +162,15 @@ def civ110(ctx):
 
 # a wikilink; the label part may contain nested (complete) links, as in
 # image captions
-_LINK_RE = re.compile(
-    r"\[\[([^\[\]|\n]*)(?:\|(?:[^\[\]]|\[\[[^\[\]]*\]\])*)?\]\]"
-)
+_LINK_RE = re.compile(r"\[\[([^\[\]|\n]*)(?:\|(?:[^\[\]]|\[\[[^\[\]]*\]\])*)?\]\]")
 _LINK_NAMESPACES = {
-    "file", "image", "category", "template", "project", "civwiki", "help",
+    "file",
+    "image",
+    "category",
+    "template",
+    "project",
+    "civwiki",
+    "help",
 }
 
 
@@ -276,11 +283,9 @@ def cw130(ctx):
         return
     edits.reverse()
     message = (
-        "transcluded output ends with a newline; articles get a stray"
-        " blank line"
+        "transcluded output ends with a newline; articles get a stray" " blank line"
         if newlines
-        else "transcluded output ends with spaces; articles get stray"
-        " whitespace"
+        else "transcluded output ends with spaces; articles get stray" " whitespace"
     )
     yield Finding(
         code="CW130",
@@ -454,7 +459,5 @@ def cw132(ctx):
                     )
                 )
                 message = f"empty argument to '{name}' (stray '|')"
-            yield Finding(
-                code="CW132", message=message, start=ps - 1, end=pe, fix=fix
-            )
+            yield Finding(code="CW132", message=message, start=ps - 1, end=pe, fix=fix)
             i += 1

@@ -152,9 +152,7 @@ def ty001(ctx):
                 ),
             )
         else:
-            options = " or ".join(
-                f'"{_match_case(word, c)}"' for c in corrections
-            )
+            options = " or ".join(f'"{_match_case(word, c)}"' for c in corrections)
             yield Finding(
                 code="TY001",
                 message=f'"{word}" is a misspelling of {options}',

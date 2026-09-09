@@ -1,4 +1,5 @@
-from pywikibot import APISite, Page as _Page
+from pywikibot import Page as _Page
+from pywikibot.site import APISite
 
 
 class Site(APISite):

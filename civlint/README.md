@@ -55,10 +55,11 @@ point into the raw wikitext:
 ```python
 from civlint.types import Applicability, Edit, Finding, Fix, rule
 
+
 @rule("CW999", "one-line summary shown in listings")
 def civ999(ctx):
     """Longer doc shown by `civlint rule CW999`."""
-    for m in ctx.finditer(r"pattern"):        # skips nowiki/comments/pre/...
+    for m in ctx.finditer(r"pattern"):  # skips nowiki/comments/pre/...
         yield Finding(
             code="CW999",
             message="what is wrong here",

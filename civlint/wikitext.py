@@ -1,7 +1,7 @@
 """Pure-text wikitext primitives shared by the index builder and rules."""
 
 import re
-from typing import Iterable, Iterator
+from collections.abc import Iterable, Iterator
 
 # Canonical category-link matcher, based on the strictest historical variant.
 # The namespace word is case-insensitive; `name` excludes brackets, pipes,
@@ -72,8 +72,12 @@ def remove_span_and_line(text: str, start: int, end: int) -> tuple[int, int]:
     return line_start, min(line_end + 1, len(text))
 
 
-_ONLYINCLUDE_RE = re.compile(r"<onlyinclude>(.*?)</onlyinclude>", re.DOTALL | re.IGNORECASE)
-_NOINCLUDE_RE = re.compile(r"<noinclude>.*?(?:</noinclude>|\Z)", re.DOTALL | re.IGNORECASE)
+_ONLYINCLUDE_RE = re.compile(
+    r"<onlyinclude>(.*?)</onlyinclude>", re.DOTALL | re.IGNORECASE
+)
+_NOINCLUDE_RE = re.compile(
+    r"<noinclude>.*?(?:</noinclude>|\Z)", re.DOTALL | re.IGNORECASE
+)
 _INCLUDEONLY_TAG_RE = re.compile(r"</?includeonly>", re.IGNORECASE)
 
 

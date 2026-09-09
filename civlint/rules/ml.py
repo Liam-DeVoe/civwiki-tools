@@ -6,9 +6,7 @@ from civlint.types import Applicability, Edit, Finding, Fix, rule
 from civlint.wikitext import FILE_PREFIX_RE, split_top_level
 
 _OBSOLETE_TAGS = ("font", "center", "tt", "strike", "big")
-_OBSOLETE_RE = re.compile(
-    rf"<({'|'.join(_OBSOLETE_TAGS)})\b([^<>]*)>", re.IGNORECASE
-)
+_OBSOLETE_RE = re.compile(rf"<({'|'.join(_OBSOLETE_TAGS)})\b([^<>]*)>", re.IGNORECASE)
 # a font tag whose attributes are exactly one color=... assignment
 _FONT_COLOR_RE = re.compile(
     r"""\s*color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'<>]+))\s*""",
@@ -63,7 +61,8 @@ def ml001(ctx):
                 fix = Fix(
                     edits=[
                         Edit(
-                            m.start(), m.end(),
+                            m.start(),
+                            m.end(),
                             '<div style="text-align:center;">',
                         ),
                         Edit(close.start(), close.end(), "</div>"),
@@ -74,7 +73,8 @@ def ml001(ctx):
                 fix = Fix(
                     edits=[
                         Edit(
-                            m.start(), m.end(),
+                            m.start(),
+                            m.end(),
                             '<span style="font-size:larger;">',
                         ),
                         Edit(close.start(), close.end(), "</span>"),
@@ -88,7 +88,8 @@ def ml001(ctx):
                     fix = Fix(
                         edits=[
                             Edit(
-                                m.start(), m.end(),
+                                m.start(),
+                                m.end(),
                                 f'<span style="color:{color};">',
                             ),
                             Edit(close.start(), close.end(), "</span>"),
@@ -108,12 +109,63 @@ def ml001(ctx):
 # tags (br, hr, wbr) and extension tags (ref, gallery, ...) are absent, as
 # are unknown tags, which mediawiki renders as literal text.
 _HTML_NONVOID = {
-    "abbr", "b", "bdi", "bdo", "big", "blockquote", "caption", "center",
-    "cite", "data", "dd", "del", "dfn", "div", "dl", "dt", "em", "font",
-    "h1", "h2", "h3", "h4", "h5", "h6", "i", "ins", "kbd", "li", "mark",
-    "ol", "p", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "small",
-    "span", "strike", "strong", "sub", "sup", "table", "tbody", "td",
-    "tfoot", "th", "thead", "time", "tr", "tt", "u", "ul", "var",
+    "abbr",
+    "b",
+    "bdi",
+    "bdo",
+    "big",
+    "blockquote",
+    "caption",
+    "center",
+    "cite",
+    "data",
+    "dd",
+    "del",
+    "dfn",
+    "div",
+    "dl",
+    "dt",
+    "em",
+    "font",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "i",
+    "ins",
+    "kbd",
+    "li",
+    "mark",
+    "ol",
+    "p",
+    "q",
+    "rb",
+    "rp",
+    "rt",
+    "rtc",
+    "ruby",
+    "s",
+    "samp",
+    "small",
+    "span",
+    "strike",
+    "strong",
+    "sub",
+    "sup",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "time",
+    "tr",
+    "tt",
+    "u",
+    "ul",
+    "var",
 }
 _SELF_CLOSED_RE = re.compile(r"<([A-Za-z][\w-]*)((?:\s[^<>]*?)?)\s*/\s*>")
 
@@ -141,9 +193,26 @@ def ml002(ctx):
 
 
 _IMAGE_KEYWORDS = {
-    "thumb", "thumbnail", "frame", "framed", "frameless", "border", "left",
-    "right", "center", "centre", "none", "baseline", "sub", "super", "top",
-    "text-top", "middle", "bottom", "text-bottom", "upright",
+    "thumb",
+    "thumbnail",
+    "frame",
+    "framed",
+    "frameless",
+    "border",
+    "left",
+    "right",
+    "center",
+    "centre",
+    "none",
+    "baseline",
+    "sub",
+    "super",
+    "top",
+    "text-top",
+    "middle",
+    "bottom",
+    "text-bottom",
+    "upright",
 }
 # a table inside a file caption is legal, and its row/cell pipes are not
 # param separators; pipe attribution is ambiguous, so skip the whole link
@@ -196,9 +265,7 @@ def ml003(ctx):
             )
 
 
-_EXTLINK_RE = re.compile(
-    r"\[(?:https?|ftp)://(?:[^\][\n]|\[\[[^\][\n]*?\]\])*\]"
-)
+_EXTLINK_RE = re.compile(r"\[(?:https?|ftp)://(?:[^\][\n]|\[\[[^\][\n]*?\]\])*\]")
 
 
 @rule("ML004", "wikilink inside external link")

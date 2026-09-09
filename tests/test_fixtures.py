@@ -70,7 +70,9 @@ def test_fixture_dirs_are_valid():
     for rule_dir in FIXTURES.iterdir():
         if rule_dir.name.startswith("."):
             continue
-        assert rule_dir.name in REGISTRY, f"fixture dir for unknown rule {rule_dir.name}"
+        assert (
+            rule_dir.name in REGISTRY
+        ), f"fixture dir for unknown rule {rule_dir.name}"
 
 
 def test_every_rule_has_fixtures():

@@ -1,6 +1,7 @@
 import re
+from collections.abc import Iterable, Iterator
 from functools import cached_property
-from typing import Iterable, Iterator, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import mwparserfromhell
 
@@ -110,9 +111,7 @@ class PageContext:
             # <nowiki>/<pre> (e.g. on a page documenting civlint) is display
             # text, not a directive. Its enclosing shield span starts before
             # the "<!--"; a genuine comment's shield span starts exactly at it.
-            if any(
-                s < m.start() and m.end() <= e for s, e in self.shielded
-            ):
+            if any(s < m.start() and m.end() <= e for s, e in self.shielded):
                 continue
             codes.update(c.strip() for c in m.group(1).split(",") if c.strip())
         return codes

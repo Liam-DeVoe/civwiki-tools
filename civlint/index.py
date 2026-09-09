@@ -6,8 +6,8 @@ Built by ``civlint index`` (network); read-only during linting so that
 
 import re
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 from civlint.anchors import page_anchors
 from civlint.wikitext import CATEGORY_RE, REDIRECT_RE, transcluded_spans
@@ -199,9 +199,7 @@ class SiteIndex:
         title = normalize_title(title)
         while title not in seen:
             seen.add(title)
-            row = self._one(
-                "SELECT redirect FROM pages WHERE title = ?", title
-            )
+            row = self._one("SELECT redirect FROM pages WHERE title = ?", title)
             if row is None:
                 return None
             if row[0] is None:
@@ -252,7 +250,9 @@ def _leading_template_calls(text: str) -> Iterator[tuple[str, str]]:
             return
 
 
-def _fetch_template_info(site, calls: dict[str, str]) -> Iterator[tuple[str, bool, int]]:
+def _fetch_template_info(
+    site, calls: dict[str, str]
+) -> Iterator[tuple[str, bool, int]]:
     """Expand one representative as-written call per template and yield
     (name, expands to nothing, trailing newlines of expansion)."""
     for name, call in sorted(calls.items()):
@@ -260,7 +260,7 @@ def _fetch_template_info(site, calls: dict[str, str]) -> Iterator[tuple[str, boo
             action="expandtemplates", text=call, prop="wikitext"
         ).submit()
         expansion = r["expandtemplates"]["wikitext"]
-        trailing_ws = expansion[len(expansion.rstrip()):]
+        trailing_ws = expansion[len(expansion.rstrip()) :]
         yield name, expansion.strip() == "", trailing_ws.count("\n")
 
 

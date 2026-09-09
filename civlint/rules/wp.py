@@ -33,9 +33,7 @@ def _link_balance(ctx):
     may legally span lines (even blank ones) in its caption, so neither
     its brackets nor its blank lines may disturb the balance.
     """
-    parsed = [
-        (s, e) for s, e, _ in ctx.node_spans(ctx.wikicode.filter_wikilinks())
-    ]
+    parsed = [(s, e) for s, e, _ in ctx.node_spans(ctx.wikicode.filter_wikilinks())]
     opens, closes, stack = [], [], []
     for m in ctx.finditer(r"\[\[|\]\]|\n[ \t]*\n"):
         if overlaps(parsed, m.start(), m.end()):
@@ -166,9 +164,7 @@ def cw010(ctx):
     for pos in opens:
         if _in_ext_link(ctx.text, pos):
             continue
-        yield Finding(
-            code="WP010", message="unmatched [[", start=pos, end=pos + 2
-        )
+        yield Finding(code="WP010", message="unmatched [[", start=pos, end=pos + 2)
 
 
 _INVIS = {
@@ -289,9 +285,7 @@ def cw043(ctx):
     """A {{ with no matching }} anywhere on the page."""
     opens, _ = _brace_balance(ctx)
     for pos in opens:
-        yield Finding(
-            code="WP043", message="unmatched {{", start=pos, end=pos + 2
-        )
+        yield Finding(code="WP043", message="unmatched {{", start=pos, end=pos + 2)
 
 
 @rule("WP044", "bold markup in heading")
@@ -323,9 +317,7 @@ def cw046(ctx):
     for pos in closes:
         if _in_ext_link(ctx.text, pos):
             continue
-        yield Finding(
-            code="WP046", message="unmatched ]]", start=pos, end=pos + 2
-        )
+        yield Finding(code="WP046", message="unmatched ]]", start=pos, end=pos + 2)
 
 
 @rule("WP047", "unmatched }}")
@@ -333,9 +325,7 @@ def cw047(ctx):
     """A }} with no matching {{ before it on the page."""
     _, closes = _brace_balance(ctx)
     for pos in closes:
-        yield Finding(
-            code="WP047", message="unmatched }}", start=pos, end=pos + 2
-        )
+        yield Finding(code="WP047", message="unmatched }}", start=pos, end=pos + 2)
 
 
 _LIST_BR = re.compile(rf"^[*#:;][^\n]*?([ \t]*(?:{BR}))[ \t]*$", re.I | re.M)
@@ -562,7 +552,5 @@ def cw538(ctx):
             message="whitespace after heading",
             start=m.start("trail"),
             end=m.end("trail"),
-            fix=Fix(
-                [Edit(m.start("trail"), m.end("trail"), "")], Applicability.SAFE
-            ),
+            fix=Fix([Edit(m.start("trail"), m.end("trail"), "")], Applicability.SAFE),
         )

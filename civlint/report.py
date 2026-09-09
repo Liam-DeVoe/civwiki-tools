@@ -119,6 +119,7 @@ def generate(code, ns=0, limit=None, open_browser=False):
     changed_pages = 0
 
     for title, text in ix.all_pages(ns=ns, include_redirects=True):
+
         def lint(t, _title=title):
             return engine.lint(PageContext(_title, t, ix), select=[code])
 
@@ -163,7 +164,9 @@ def generate(code, ns=0, limit=None, open_browser=False):
 fixes change <b>{changed_pages}</b> pages{shown}.</p>
 {"".join(sections)}
 </body></html>""")
-    print(f"{code}: {total_findings} findings, {total_pages} pages, "
-          f"{changed_pages} changed -> {out}")
+    print(
+        f"{code}: {total_findings} findings, {total_pages} pages, "
+        f"{changed_pages} changed -> {out}"
+    )
     if open_browser:
         webbrowser.open(out.as_uri())

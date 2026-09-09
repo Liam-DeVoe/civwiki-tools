@@ -109,7 +109,9 @@ CONTENT_TYPE_EXTENSIONS = {
 
 URL_RE = re.compile(r'https?://[^\s<>\[\]{}|"]+')
 REF_RE = re.compile(r"<ref[^>/]*>.*?</ref>", re.DOTALL | re.IGNORECASE)
-NOWIKI_RE = re.compile(r"<nowiki>.*?</nowiki>|<pre>.*?</pre>", re.DOTALL | re.IGNORECASE)
+NOWIKI_RE = re.compile(
+    r"<nowiki>.*?</nowiki>|<pre>.*?</pre>", re.DOTALL | re.IGNORECASE
+)
 COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 
 session = requests.Session()
@@ -202,9 +204,7 @@ def extract_links(text):
 def already_archived(text, link):
     window = text[link.end : (link.insert_at or link.end) + 200]
     return (
-        "archived])" in window
-        or "archived]]" in window
-        or "web.archive.org" in window
+        "archived])" in window or "archived]]" in window or "web.archive.org" in window
     )
 
 
@@ -257,9 +257,7 @@ def resolve_media_url(url):
         return url
     if dom == "streamable.com":
         video_id = path.strip("/").split("/")[-1]
-        r = session.get(
-            f"https://api.streamable.com/videos/{video_id}", timeout=30
-        )
+        r = session.get(f"https://api.streamable.com/videos/{video_id}", timeout=30)
         if r.ok:
             files = r.json().get("files", {})
             for key in ("mp4", "mp4-mobile"):
@@ -363,9 +361,12 @@ def download_youtube(url):
     result = subprocess.run(
         [
             "yt-dlp",
-            "--max-filesize", "2G",
-            "-f", "mp4/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
-            "-o", str(out_dir / "%(id)s.%(ext)s"),
+            "--max-filesize",
+            "2G",
+            "-f",
+            "mp4/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
+            "-o",
+            str(out_dir / "%(id)s.%(ext)s"),
             url,
         ],
         capture_output=True,
@@ -532,7 +533,9 @@ def ensure_archived(link, page_title, dead, cache, args):
                 snapshot = wayback_available(link.url)
                 if snapshot:
                     entry |= {
-                        "status": "archived", "type": "wayback", "value": snapshot,
+                        "status": "archived",
+                        "type": "wayback",
+                        "value": snapshot,
                     }
                 else:
                     entry["status"] = "dead"
@@ -631,9 +634,13 @@ def process_page(page, dead, cache, args):
     try:
         page.text = new_text
         with_relog(
-            lambda: page.save(f"add archived copies of {len(insertions)} external sources")
+            lambda: page.save(
+                f"add archived copies of {len(insertions)} external sources"
+            )
         )
-        print(f"  saved: https://civwiki.org/w/index.php?diff={page.latest_revision_id}")
+        print(
+            f"  saved: https://civwiki.org/w/index.php?diff={page.latest_revision_id}"
+        )
     except PywikibotError as e:
         print(f"  error saving: {e}")
 
@@ -722,9 +729,7 @@ group.add_argument("--pages", help="pipe-separated page titles")
 group.add_argument("--all", action="store_true", help="all pages from the scan file")
 parser_run.add_argument("--dry", action="store_true", help="print diffs, don't save")
 parser_run.add_argument("--limit", type=int, default=None)
-parser_run.add_argument(
-    "--sections", default="refs,other", type=lambda s: s.split(",")
-)
+parser_run.add_argument("--sections", default="refs,other", type=lambda s: s.split(","))
 parser_run.add_argument("--include-youtube", action="store_true")
 parser_run.add_argument("--retry-failed", action="store_true")
 parser_run.set_defaults(func=run)

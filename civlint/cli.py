@@ -2,8 +2,9 @@ import argparse
 import difflib
 import json
 import sys
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 from civlint import engine, fixer
 from civlint.context import PageContext
@@ -56,8 +57,7 @@ def cmd_check(args) -> int:
     index = _load_index()
     if index is None:
         skipped = [
-            c for c in selected_codes(select, ignore)
-            if REGISTRY[c].requires_index
+            c for c in selected_codes(select, ignore) if REGISTRY[c].requires_index
         ]
         if skipped:
             print(
@@ -70,6 +70,7 @@ def cmd_check(args) -> int:
     results = []
 
     for title, text in _iter_pages(args, index):
+
         def lint_text(t, _title=title):
             return engine.lint(
                 PageContext(_title, t, index), select=select, ignore=ignore
@@ -89,19 +90,21 @@ def cmd_check(args) -> int:
             exit_code = 1
 
         if args.format == "json":
-            results.append({
-                "title": title,
-                "fixed": dict(applied) if applied else {},
-                "findings": [
-                    {
-                        "code": f.code,
-                        "message": f.message,
-                        "line": f.line(fixed_text),
-                        "fixable": f.fix.applicability.value if f.fix else None,
-                    }
-                    for f in remaining
-                ],
-            })
+            results.append(
+                {
+                    "title": title,
+                    "fixed": dict(applied) if applied else {},
+                    "findings": [
+                        {
+                            "code": f.code,
+                            "message": f.message,
+                            "line": f.line(fixed_text),
+                            "fixable": f.fix.applicability.value if f.fix else None,
+                        }
+                        for f in remaining
+                    ],
+                }
+            )
             continue
 
         print(f"\n== {title} ==")
@@ -155,8 +158,10 @@ def cmd_check(args) -> int:
                     try:
                         page.save(summary=summary)
                     except Exception as err2:
-                        print(f"  save failed again, skipping page: {err2}",
-                              file=sys.stderr)
+                        print(
+                            f"  save failed again, skipping page: {err2}",
+                            file=sys.stderr,
+                        )
                         continue
                 edited += 1
                 print("  saved.")
@@ -170,8 +175,7 @@ def cmd_check(args) -> int:
 def cmd_report(args) -> int:
     from civlint import report
 
-    report.generate(args.code, ns=args.ns, limit=args.limit,
-                    open_browser=args.open)
+    report.generate(args.code, ns=args.ns, limit=args.limit, open_browser=args.open)
     return 0
 
 
@@ -207,17 +211,27 @@ def main(argv=None) -> int:
 
     p = sub.add_parser("check", help="lint pages")
     p.add_argument("pages", nargs="*", help="page titles (fetched live)")
-    p.add_argument("--all", action="store_true", help="all pages of --ns from the index")
-    p.add_argument("--ns", type=int, default=0,
-                   help="namespace for --all (0 articles, 10 templates)")
+    p.add_argument(
+        "--all", action="store_true", help="all pages of --ns from the index"
+    )
+    p.add_argument(
+        "--ns",
+        type=int,
+        default=0,
+        help="namespace for --all (0 articles, 10 templates)",
+    )
     p.add_argument("--category", help="lint members of a category")
     p.add_argument("--select", action="append", help="rule code prefix to run")
     p.add_argument("--ignore", action="append", help="rule code prefix to skip")
     p.add_argument("--fix", action="store_true", help="apply safe fixes")
-    p.add_argument("--unsafe-fixes", action="store_true", help="also apply unsafe fixes")
+    p.add_argument(
+        "--unsafe-fixes", action="store_true", help="also apply unsafe fixes"
+    )
     p.add_argument("--diff", action="store_true", help="show diffs of fixes")
     p.add_argument("--save", action="store_true", help="save fixes to the wiki")
-    p.add_argument("--limit", type=int, default=25, help="max pages to edit with --save")
+    p.add_argument(
+        "--limit", type=int, default=25, help="max pages to edit with --save"
+    )
     p.add_argument("--format", choices=["text", "json"], default="text")
     p.set_defaults(func=cmd_check)
 

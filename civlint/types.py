@@ -1,6 +1,7 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Iterator, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from civlint.context import PageContext
@@ -83,9 +84,7 @@ def rule(code: str, summary: str, *, requires_index: bool = False):
     return decorator
 
 
-def selected_codes(
-    select: list[str] | None, ignore: list[str] | None
-) -> list[str]:
+def selected_codes(select: list[str] | None, ignore: list[str] | None) -> list[str]:
     """Resolve --select/--ignore prefixes against the registry, ruff-style.
 
     A rule is selected if any `select` entry is a prefix of its code (or

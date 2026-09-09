@@ -21,9 +21,7 @@ def normalize_fragment(fragment: str) -> str:
     """Normalize a link fragment or heading-derived anchor for comparison."""
     fragment = unquote(fragment)
     # legacy ".XX" percent-style encoding produced by older mediawiki
-    fragment = re.sub(
-        r"\.([0-9A-F]{2})", lambda m: chr(int(m.group(1), 16)), fragment
-    )
+    fragment = re.sub(r"\.([0-9A-F]{2})", lambda m: chr(int(m.group(1), 16)), fragment)
     fragment = html.unescape(fragment)
     fragment = fragment.replace("_", " ")
     return re.sub(r"\s+", " ", fragment).strip()
@@ -41,8 +39,7 @@ def page_anchors(text: str) -> set[str]:
     # trailing comment still defines its anchor
     without_comments = COMMENT_RE.sub("", text)
     anchors = {
-        heading_anchor(m["title"])
-        for m in HEADING_RE.finditer(without_comments)
+        heading_anchor(m["title"]) for m in HEADING_RE.finditer(without_comments)
     }
     code = mwparserfromhell.parse(text)
     for template in code.filter_templates():

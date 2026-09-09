@@ -30,9 +30,7 @@ def test_civ103_existing_and_redirected_targets():
 
 def test_civ103_missing_target():
     findings = _lint("P", "See [[Missing Page|here]].", LINK_INDEX, "CW103")
-    assert [f.message for f in findings] == [
-        "links to nonexistent page 'Missing Page'"
-    ]
+    assert [f.message for f in findings] == ["links to nonexistent page 'Missing Page'"]
 
 
 def test_civ103_interwiki_skipped():
@@ -307,9 +305,7 @@ def test_cw132_bare_name_run_not_merged():
 
 def test_cw132_existing_named_key_blocks_merge():
     # merging would create a duplicate alt=; report only
-    findings = _lint(
-        "P", "{{Infobox paper|alt=A|alt|caption}}", CW132_INDEX, "CW132"
-    )
+    findings = _lint("P", "{{Infobox paper|alt=A|alt|caption}}", CW132_INDEX, "CW132")
     assert len(findings) == 2
     assert all(f.fix is None for f in findings)
 

@@ -156,31 +156,25 @@ class FactoryModPrinter:
             r for r in self.factory.recipes if r.type is RecipeType.REPAIR
         ]
 
-        return "".join(
-            f"""
+        return "".join(f"""
             |-
             |{self.recipe_quantity_cell(r, "input")}
             |{r.health_gained}
             |{self.time_cell(r)}
-            |{self.fuel_cell(r)}"""
-            for r in repair_recipes
-        )
+            |{self.fuel_cell(r)}""" for r in repair_recipes)
 
     def recipes(self):
         non_production_types = [RecipeType.UPGRADE, RecipeType.REPAIR]
         recipes = [
             r for r in self.factory.recipes if r.type not in non_production_types
         ]
-        return "".join(
-            f"""
+        return "".join(f"""
             |-
             |{r.name}
             |{self.recipe_quantity_cell(r, "input")}
             |{self.recipe_quantity_cell(r, "output")}
             |{self.time_cell(r)}
-            |{self.fuel_cell(r)}"""
-            for r in recipes
-        )
+            |{self.fuel_cell(r)}""" for r in recipes)
 
     def upgrades_from_to(self):
         upgrades_from = self.config.upgrades_from[self.factory.name]
@@ -191,10 +185,10 @@ class FactoryModPrinter:
         # number of upgrades to / from recipes might be imbalanced. Pad whichever
         # is lowest with {n/a} rows
         for i in range(max(len(upgrades_from), len(upgrades_to))):
-            (r_from, f_from) = (
+            r_from, f_from = (
                 upgrades_from[i] if i < len(upgrades_from) else (None, None)
             )
-            (r_to, f_to) = upgrades_to[i] if i < len(upgrades_to) else (None, None)
+            r_to, f_to = upgrades_to[i] if i < len(upgrades_to) else (None, None)
             row = f"""
                 |-
                 |{f"{f_from.name}\n|{self.recipe_quantity_cell(r_from, "input")}" if f_from else " colspan=\"2\" {{n/a}}"}
@@ -266,16 +260,14 @@ class FactoryModPrinter:
     def random_recipes_tables(self):
         tables = []
         for random_recipe in self.random_recipes:
-            tables.append(
-                f"""
+            tables.append(f"""
             {{| class="wikitable"
             |+{{{{anchor|{random_recipe.name}}}}} {random_recipe.name}
             !Probability
             !Drops
             {self.random_recipe_cells(random_recipe)}
             |}}
-        """.strip()
-            )
+        """.strip())
 
         return "\n\n".join(tables)
 

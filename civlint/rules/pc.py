@@ -75,9 +75,7 @@ def pc001(ctx):
         )
 
 
-_PIPED_LINK_RE = re.compile(
-    r"\[\[(?P<title>[^\]\|\n#:]+)\|(?P<label>[^\]\|\n]+)\]\]"
-)
+_PIPED_LINK_RE = re.compile(r"\[\[(?P<title>[^\]\|\n#:]+)\|(?P<label>[^\]\|\n]+)\]\]")
 # linktrail for an English wiki: characters that may follow ]] as part of
 # the rendered link word
 
@@ -261,9 +259,7 @@ def pc006(ctx):
         )
 
 
-_LIST_RE = re.compile(
-    r"(?m)^(?P<bullet>[:;]*(\*+|#+)[:;\*#]*)(?P<char>[^\s\*#:;].*?)"
-)
+_LIST_RE = re.compile(r"(?m)^(?P<bullet>[:;]*(\*+|#+)[:;\*#]*)(?P<char>[^\s\*#:;].*?)")
 
 
 @rule("PC007", "list item marker not followed by a space")
@@ -310,6 +306,7 @@ def pc008(ctx):
     in a known file extension. The upstream conversion of self-wiki URLs
     to wikilinks needs live site URLs and is not ported.
     """
+
     def ext_double(m):
         # a pipe inside [[https://...|label]] is the wikilink separator;
         # kept verbatim it would be percent-encoded into the URL

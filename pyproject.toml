@@ -18,4 +18,3 @@ packages = ["civwiki_tools", "civlint", "civlint.rules"]
 
 [tool.setuptools.package-data]
 civlint = ["data/*.txt"]
-

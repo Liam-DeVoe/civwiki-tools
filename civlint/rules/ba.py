@@ -63,8 +63,7 @@ def ba001(ctx):
         yield Finding(
             code="BA001",
             message=(
-                f"section '#{frag.strip()}' not found"
-                f" on [[{display}]]{suffix}"
+                f"section '#{frag.strip()}' not found" f" on [[{display}]]{suffix}"
             ),
             start=start,
             end=end,
