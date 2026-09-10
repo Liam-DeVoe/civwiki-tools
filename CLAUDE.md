@@ -14,8 +14,9 @@ cp config.py.sample config.py
 ## Interacting with CivWiki
 
 ```python
-from civwiki_tools import site  # importing triggers login
 import pywikibot
+
+from civwiki_tools import site  # importing triggers login
 
 # reading a page
 page = site.page("Some Page")
@@ -31,9 +32,9 @@ category = pywikibot.Category(site, "Category:CivMC")
 members = category.members()
 categories = site.page("Some Page").categories()
 
-pages = site.page("Some Page").backlinks() # pages linking to a page
-pages = site.search("some phrase", namespaces=[0]) # searching page text
-site.page("Some Page").exists() # checking whether a page exists
+pages = site.page("Some Page").backlinks()  # pages linking to a page
+pages = site.search("some phrase", namespaces=[0])  # searching page text
+site.page("Some Page").exists()  # checking whether a page exists
 ```
 
 - Prefix edit summaries with `automated: ` unless told otherwise.
